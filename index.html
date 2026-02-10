@@ -550,7 +550,7 @@
             saturateBtn.disabled = true;
             try {
                 const b64 = canvas.toDataURL('image/png').split(',')[1];
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
                 
                 const response = await fetchWithRetry(url, {
                     method: 'POST',
@@ -607,6 +607,7 @@
 </body>
 
 </html>
+
 
 
 
