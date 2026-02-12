@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "io.github.universallbalance_cyber.ink_gen_app.twa",
-    "sha256_cert_fingerprints": ["SHA256: C5:CF:6E:D5:91:F7:5A:B2:25:7B:79:2D:28:61:BB:48:CF:73:A2:41:DF:ED:AD:00:A2:8F:6E:99:3B:96:8E:2D"]
+    "sha256_cert_fingerprints": ["C5:CF:6E:D5:91:F7:5A:B2:25:7B:79:2D:28:61:BB:48:CF:73:A2:41:DF:ED:AD:00:A2:8F:6E:99:3B:96:8E:2D"]
   }
 }]
