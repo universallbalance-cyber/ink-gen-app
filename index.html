@@ -627,29 +627,12 @@
         };
 
         init();
-		// Help Modal Logic
-        const helpModal = document.getElementById('helpModal');
-        const helpBtn = document.getElementById('helpBtn');
-        const closeHelp = document.getElementById('closeHelp');
-
-        helpBtn.onclick = () => {
-            helpModal.style.display = 'flex';
-        };
-
-        closeHelp.onclick = () => {
-            helpModal.style.display = 'none';
-        };
-
-        // Close if clicking outside the box
-        window.addEventListener('click', (e) => {
-            if (e.target === helpModal) {
-                helpModal.style.display = 'none';
-            }
-        });
+		
     </script>
 </body>
 
 </html>
+
 
 
 
