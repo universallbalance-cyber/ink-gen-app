@@ -26,10 +26,7 @@ jobs:
 
       - name: Create env.js from Secret
         run: |
-          # This creates the file in the root directory
           echo "window.GOOGLE_API_KEY = '${{ secrets.GEMINI_API_KEY }}';" > env.js
-          # This creates the file inside your project folder just in case
-          echo "window.GOOGLE_API_KEY = '${{ secrets.GEMINI_API_KEY }}';" > ink-gen-android/env.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -37,7 +34,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # This ensures EVERYTHING in your repo is uploaded to the web server
           path: '.' 
 
       - name: Deploy to GitHub Pages
