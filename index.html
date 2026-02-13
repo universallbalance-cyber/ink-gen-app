@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <script src="env.js"></script>
 	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="shortcut icon" href="/favicon.ico" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 	<link rel="manifest" href="/site.webmanifest" />
-	<meta name="referrer" content="no-referrer-when-downgrade">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>INK-GEN PRO | Professional Tattoo Studio</title>
@@ -413,7 +414,8 @@
     }
 })();
 		import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-        const apiKey = "AIzaSyApo5_2UdCR44CLb-jiaYr2HJgNzV-w0ww";
+    	// Grab the key from the window object we created in env.js
+    	const apiKey = window.GOOGLE_API_KEY;
 		const genAI = new GoogleGenerativeAI(apiKey);
         const homePage = document.getElementById('homePage');
         const studioPage = document.getElementById('studioPage');
@@ -686,6 +688,7 @@
 </body>
 
 </html>
+
 
 
 
