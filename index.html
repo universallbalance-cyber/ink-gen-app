@@ -374,7 +374,7 @@
         </footer>
 </div> 
 
-	<button id="helpBtn" style="position: fixed; bottom: 110px; right: 200px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
+	<button id="helpBtn" style="position: fixed; bottom: 110px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
 
     <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
         <div style="width: 85%; max-width: 400px; padding: 30px; border: 1px solid rgba(56, 189, 248, 0.2); background: #050505; border-radius: 4px; font-family: 'Outfit', sans-serif; color: white; text-align: left;">
@@ -394,28 +394,6 @@
     <audio id="player" loop></audio>
 
     <script type="module">
-		(function() {
-    // 1. Check for the official App "User Agent"
-    // We will set this specific name in Android Studio later
-    const isAuthorizedApp = navigator.userAgent.includes("INKGEN-PRO-OFFICIAL");
-
-    // 2. Check for a password (saved in the phone's memory)
-    const hasUnlocked = localStorage.getItem('inkGenAuthorized') === 'true';
-
-    if (!isAuthorizedApp && !hasUnlocked) {
-        const pass = prompt("ENTER ACCESS KEY:");
-        if (pass === "1234") { // Change "1234" to your chosen password
-            localStorage.setItem('inkGenAuthorized', 'true');
-        } else {
-            document.body.innerHTML = `
-                <div style="background:#000; color:#38bdf8; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:Orbitron; text-align:center; padding:20px;">
-                    <h1 style="font-size:20px; letter-spacing:4px;">ACCESS DENIED</h1>
-                    <p style="font-family:Outfit; opacity:0.6; font-size:12px; margin-top:10px;">OFFICIAL INK-GEN PRO APK REQUIRED</p>
-                </div>`;
-            window.stop();
-        }
-    }
-})();
 		import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
         const apiKey = "AIzaSyApo5_2UdCR44CLb-jiaYr2HJgNzV-w0ww";
 		const genAI = new GoogleGenerativeAI(apiKey);
@@ -661,6 +639,7 @@
 </body>
 
 </html>
+
 
 
 
