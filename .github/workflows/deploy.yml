@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Change to "master" if your branch uses that name
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -27,7 +26,10 @@ jobs:
 
       - name: Create env.js from Secret
         run: |
+          # This creates the file in the root directory
           echo "window.GOOGLE_API_KEY = '${{ secrets.GEMINI_API_KEY }}';" > env.js
+          # This creates the file inside your project folder just in case
+          echo "window.GOOGLE_API_KEY = '${{ secrets.GEMINI_API_KEY }}';" > ink-gen-android/env.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -35,7 +37,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # This uploads your entire folder including the new env.js
+          # This ensures EVERYTHING in your repo is uploaded to the web server
+          path: '.' 
 
       - name: Deploy to GitHub Pages
         id: deployment
