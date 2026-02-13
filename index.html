@@ -546,31 +546,26 @@
             return map[style] || map.fineline;
         };
 
-    async function generate() {
+   async function generate() {
         const p = promptInput.value.trim();
-        
-        // 1. First, check if the box is empty. If it is, just stop.
         if (!p) return;
 
-        // 2. --- THE HIDDEN UPGRADE CHECK ---
-        // 'SU5LLUJPVFMtMjAyNg==' is 'INK-BOTS-2026'
-        try {
+        // --- 1. THE SECRET PASSWORD CHECK ---
+         try {
             if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
                 localStorage.setItem('inkGen_isPro', 'true');
-                promptInput.value = ''; 
-                showMessage("PRO STATUS ACTIVATED.");
-                return; 
+                promptInput.value = ''; // Clear the box
+                showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
+                return; // Stop here so it doesn't waste an API call
             }
-        } catch(e) {
-            // Safety for the btoa check
-        }
+        } catch(e) {}
 
-        // 3. --- THE LIMIT CHECK ---
+        // --- 2. THE LIMIT CHECK ---
         const isPro = localStorage.getItem('inkGen_isPro') === 'true';
         let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
 
         if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-            showMessage(`DAILY LIMIT REACHED.`);
+            showMessage(`DAILY LIMIT REACHED. PLEASE UPGRADE.`);
             return; 
         }
 
@@ -690,6 +685,7 @@
 </body>
 
 </html>
+
 
 
 
