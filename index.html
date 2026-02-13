@@ -547,112 +547,75 @@
         };
 
     async function generate() {
-    const p = promptInput.value.trim();
-    
-    // 1. First, check if the box is empty. If it is, just stop.
-    if (!p) return;
-
-    // 2. --- THE HIDDEN UPGRADE CHECK ---
-    // We only check this if there is actually text in the box
-    if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
-        localStorage.setItem('inkGen_isPro', 'true');
-        promptInput.value = ''; 
-        showMessage("PRO STATUS ACTIVATED.");
-        return; 
-    }
-
-    // 3. --- THE LIMIT CHECK ---
-    const isPro = localStorage.getItem('inkGen_isPro') === 'true';
-    let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
-
-    if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-        showMessage(`DAILY LIMIT REACHED.`);
-        return; 
-    }
-
-    // --- 4. START THE ACTUAL GENERATION ---
-    loader.style.display = 'flex';
-    generateBtn.disabled = true;
-    saturateBtn.style.display = 'none';
-
-    try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-        const response = await fetchWithRetry(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
-                parameters: { sampleCount: 1 } 
-            })
-        });
+        const p = promptInput.value.trim();
         
-        const res = await response.json();
-        
-        if(res.predictions?.[0]) {
-            const img = new Image();
-            img.onload = () => {
-                ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-                ctx.drawImage(img, 0, 0, 1024, 1024);
-                loader.style.display = 'none';
-                saturateBtn.style.display = 'block';
+        // 1. First, check if the box is empty. If it is, just stop.
+        if (!p) return;
 
-                // Only count usage if NOT a Pro user
-                if (!isPro) {
-                    currentUsage++;
-                    localStorage.setItem('inkGen_usage', currentUsage);
-                }
-            };
-            img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-        } else { throw new Error("No prediction"); }
-    } catch(e) { 
-        console.error(e);
-        showMessage("STENCIL ENGINE FAILED. RETRYING...");
-        loader.style.display = 'none'; 
+        // 2. --- THE HIDDEN UPGRADE CHECK ---
+        // 'SU5LLUJPVFMtMjAyNg==' is 'INK-BOTS-2026'
+        try {
+            if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
+                localStorage.setItem('inkGen_isPro', 'true');
+                promptInput.value = ''; 
+                showMessage("PRO STATUS ACTIVATED.");
+                return; 
+            }
+        } catch(e) {
+            // Safety for the btoa check
+        }
+
+        // 3. --- THE LIMIT CHECK ---
+        const isPro = localStorage.getItem('inkGen_isPro') === 'true';
+        let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+
+        if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
+            showMessage(`DAILY LIMIT REACHED.`);
+            return; 
+        }
+
+        // --- 4. START THE ACTUAL GENERATION ---
+        loader.style.display = 'flex';
+        generateBtn.disabled = true;
+        saturateBtn.style.display = 'none';
+
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const response = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
+                    parameters: { sampleCount: 1 } 
+                })
+            });
+            
+            const res = await response.json();
+            
+            if(res.predictions?.[0]) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0,0,1024,1024);
+                    ctx.drawImage(img, 0, 0, 1024, 1024);
+                    loader.style.display = 'none';
+                    saturateBtn.style.display = 'block';
+
+                    // Only count usage if NOT a Pro user
+                    if (!isPro) {
+                        currentUsage++;
+                        localStorage.setItem('inkGen_usage', currentUsage.toString());
+                    }
+                };
+                img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
+            } else { throw new Error("No prediction"); }
+        } catch(e) { 
+            console.error(e);
+            showMessage("STENCIL ENGINE FAILED. RETRYING...");
+            loader.style.display = 'none'; 
+        }
+        generateBtn.disabled = false;
     }
-    generateBtn.disabled = false;
-}
-    const p = promptInput.value.trim();
-    if(!p) return;
-    
-    loader.style.display = 'flex';
-    generateBtn.disabled = true;
-    saturateBtn.style.display = 'none';
-
-    try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-        const response = await fetchWithRetry(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
-                parameters: { sampleCount: 1 } 
-            })
-        });
-        
-        const res = await response.json();
-        
-        if(res.predictions?.[0]) {
-            const img = new Image();
-            img.onload = () => {
-                ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-                ctx.drawImage(img, 0, 0, 1024, 1024);
-                loader.style.display = 'none';
-                saturateBtn.style.display = 'block';
-
-                // --- 2. INCREMENT COUNTER ON SUCCESS ---
-                currentUsage++;
-                localStorage.setItem('inkGen_usage', currentUsage);
-                console.log("Generations used:", currentUsage);
-            };
-            img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-        } else { throw new Error("No prediction"); }
-    } catch(e) { 
-        console.error(e);
-        showMessage("STENCIL ENGINE FAILED. RETRYING...");
-        loader.style.display = 'none'; 
-    }
-    generateBtn.disabled = false;
-}
 
         async function saturate() {
             loader.style.display = 'flex';
@@ -727,6 +690,7 @@
 </body>
 
 </html>
+
 
 
 
