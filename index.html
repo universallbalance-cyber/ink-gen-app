@@ -547,12 +547,21 @@
         };
 
         async function generate() {
-    // --- 1. CHECK USAGE LIMIT ---
-    let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
-    if (currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-        showMessage(`DAILY LIMIT REACHED (${CONFIG.MAX_FREE_LIMIT}/${CONFIG.MAX_FREE_LIMIT}). USE APK FOR MORE.`);
-        return; 
+ // --- 1. CHECK USAGE LIMIT ---
+let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+
+if (currentUsage >= CONFIG.MAX_FREE_LIMIT) {
+    // Check if they are in the official App or just the browser
+    const isApp = navigator.userAgent.includes(CONFIG.APP_IDENTITY);
+    
+    if (isApp) {
+        showMessage(`DAILY LIMIT REACHED. UPGRADE TO PRO FOR UNLIMITED STENCILS.`);
+        // Later, we can make this open a "Buy Subscription" window
+    } else {
+        showMessage(`LIMIT REACHED. DOWNLOAD THE OFFICIAL APK FOR MORE ACCESS.`);
     }
+    return; 
+}
 
     const p = promptInput.value.trim();
     if(!p) return;
@@ -670,6 +679,7 @@
 </body>
 
 </html>
+
 
 
 
