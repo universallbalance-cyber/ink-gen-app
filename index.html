@@ -394,6 +394,28 @@
     <audio id="player" loop></audio>
 
     <script type="module">
+		(function() {
+    // 1. Check for the official App "User Agent"
+    // We will set this specific name in Android Studio later
+    const isAuthorizedApp = navigator.userAgent.includes("INKGEN-PRO-OFFICIAL");
+
+    // 2. Check for a password (saved in the phone's memory)
+    const hasUnlocked = localStorage.getItem('inkGenAuthorized') === 'true';
+
+    if (!isAuthorizedApp && !hasUnlocked) {
+        const pass = prompt("ENTER ACCESS KEY:");
+        if (pass === "1234") { // Change "1234" to your chosen password
+            localStorage.setItem('inkGenAuthorized', 'true');
+        } else {
+            document.body.innerHTML = `
+                <div style="background:#000; color:#38bdf8; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:Orbitron; text-align:center; padding:20px;">
+                    <h1 style="font-size:20px; letter-spacing:4px;">ACCESS DENIED</h1>
+                    <p style="font-family:Outfit; opacity:0.6; font-size:12px; margin-top:10px;">OFFICIAL INK-GEN PRO APK REQUIRED</p>
+                </div>`;
+            window.stop();
+        }
+    }
+})();
 		import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
         const apiKey = "AIzaSyApo5_2UdCR44CLb-jiaYr2HJgNzV-w0ww";
 		const genAI = new GoogleGenerativeAI(apiKey);
@@ -639,6 +661,7 @@
 </body>
 
 </html>
+
 
 
 
