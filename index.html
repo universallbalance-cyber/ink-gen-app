@@ -550,9 +550,9 @@
         };
 
 async function generate() {
-    const style = getStylePrompt(selectedStyle); 
     const promptText = promptInput.value;
-    const details = ""; 
+    const style = getStylePrompt(selectedStyle);
+    const details = ""; // You can add a details input later if you want
 
     if (!promptText) {
         showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
@@ -560,9 +560,11 @@ async function generate() {
     }
 
     try {
+        // 1. Show loader and disable button
         loader.style.display = 'flex';
         generateBtn.disabled = true;
 
+        // 2. Call your Supabase Edge Function
         const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
             headers: { 
@@ -576,27 +578,39 @@ async function generate() {
         });
 
         const data = await response.json();
-        console.log("FULL RESPONSE:", data);
+        
+        // 3. Log the data so we can see it in the Inspect Console
+        console.log("FULL RESPONSE FROM SUPABASE:", data);
 
+        // 4. Handle the image data (Imagen 3 format)
         if (data.predictions && data.predictions[0]) {
-            // Imagen returns: predictions[0].bytesBase64Encoded
             const base64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
+            
             img.onload = () => {
+                // Clear canvas and draw the new tattoo
                 ctx.fillStyle = "white";
                 ctx.fillRect(0, 0, 1024, 1024);
                 ctx.drawImage(img, 0, 0, 1024, 1024);
+                
+                // UI Updates
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
+                if(typeof saturateBtn !== 'undefined') saturateBtn.style.display = 'block';
             };
+            
             img.src = `data:image/png;base64,${base64Data}`;
+            
+        } else if (data.error) {
+            // Handle specific Google/Supabase errors
+            throw new Error(data.error.message);
         } else {
-            const msg = data.error ? data.error.message : "Check console for FULL RESPONSE";
-            throw new Error(msg);
+            throw new Error("No image data found in response.");
         }
+
     } catch(e) { 
         console.error("GENERATION ERROR:", e);
-        showMessage("STENCIL ENGINE FAILED. CHECK CONSOLE.");
+        showMessage("ENGINE ERROR: " + e.message);
         loader.style.display = 'none'; 
         generateBtn.disabled = false;
     }
@@ -666,6 +680,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
