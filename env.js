@@ -1,2 +1,2 @@
-window.SUPABASE_URL = "https://your-project-id.supabase.co/functions/v1/gemini-proxy";
+window.SUPABASE_URL = "https://helkjzzgtnrcvrhmizzy.supabase.co/functions/v1/gemini-proxy";
 
