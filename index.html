@@ -550,7 +550,6 @@
         };
 
 async function generate() {
-    // 1. Define these variables so the browser knows what they are
     const style = getStylePrompt(selectedStyle); 
     const promptText = promptInput.value;
     const details = ""; 
@@ -564,7 +563,7 @@ async function generate() {
         loader.style.display = 'flex';
         generateBtn.disabled = true;
 
-		const response = await fetch(window.SUPABASE_URL, {
+        const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -576,17 +575,16 @@ async function generate() {
             })
         });
 
-        const data = await response.json(); // We use 'data' here
-		console.log("FULL RESPONSE FROM SUPABASE:", data);
+        const data = await response.json(); 
+        
+        // This is the line we need to see in the Console!
+        console.log("FULL RESPONSE FROM SUPABASE:", data);
             
-        if(data.predictions && data.predictions[0]) {
-            
-        // Check for predictions in the 'data' variable
-        if(data.predictions?.[0]) {
+        if (data.predictions && data.predictions[0]) {
             const img = new Image();
             img.onload = () => {
                 ctx.fillStyle = "white";
-                ctx.fillRect(0,0,1024,1024);
+                ctx.fillRect(0, 0, 1024, 1024);
                 ctx.drawImage(img, 0, 0, 1024, 1024);
                 loader.style.display = 'none';
                 saturateBtn.style.display = 'block';
@@ -594,11 +592,12 @@ async function generate() {
             };
             img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
         } else { 
+            // If data exists but 'predictions' doesn't, we'll see why in the console log above
             throw new Error("No prediction returned from engine"); 
         }
     } catch(e) { 
         console.error("GENERATION ERROR:", e);
-        showMessage("STENCIL ENGINE FAILED. RETRYING...");
+        showMessage("STENCIL ENGINE FAILED. CHECK CONSOLE.");
         loader.style.display = 'none'; 
         generateBtn.disabled = false;
     }
@@ -668,6 +667,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
