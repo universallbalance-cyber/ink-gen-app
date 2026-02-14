@@ -553,15 +553,15 @@
     // 1. CLEAR the old "const url = ..." and "apiKey" lines. 
     // They are no longer needed here!
 
-    try {
-        // 2. ONLY use the Supabase URL
-        const response = await fetch(window.SUPABASE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                prompt: `${style} tattoo of ${promptText}. ${details}` 
-            })
-        });
+try {
+    const response = await fetch(window.SUPABASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            prompt: `${style} tattoo of ${promptText}. ${details}`,
+            type: 'image' // This tells Supabase to use the Imagen model
+        })
+    });
 
         const data = await response.json();
             
@@ -593,18 +593,15 @@
        async function saturate() {
     // 1. CLEAR the old "const url = ..." and "apiKey" lines.
     
-    try {
-        loader.style.display = 'block';
-        saturateBtn.disabled = true;
-
-        // 2. Use the Supabase URL instead of the Google URL
-        const response = await fetch(window.SUPABASE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                prompt: `Apply a saturated pigment style to this tattoo description: ${promptInput.value}` 
-            })
-        });
+try {
+    const response = await fetch(window.SUPABASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            prompt: `Apply a saturated pigment style to this tattoo description: ${promptInput.value}`,
+            type: 'text' // This tells Supabase to use the Gemini Pro model
+        })
+    });
 
         const data = await response.json();
                 const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
@@ -658,6 +655,7 @@
 </body>
 
 </html>
+
 
 
 
