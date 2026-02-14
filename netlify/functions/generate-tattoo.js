@@ -31,7 +31,7 @@ exports.handler = async (event) => {
         });
 
         const data = await response.json();
-        
+        console.log("GOOGLE_RAW_RESPONSE:", JSON.stringify(data));
         return {
             statusCode: 200,
             body: JSON.stringify(data)
