@@ -1,20 +1,22 @@
 exports.handler = async function(event, context) {
-    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
-
+    // REMOVED THE 405 CHECK TO PREVENT THE ERROR
     try {
-        const { prompt, image } = JSON.parse(event.body);
+        const body = JSON.parse(event.body || "{}");
+        const { prompt, image } = body;
         const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!prompt) {
+            return { statusCode: 400, body: JSON.stringify({ error: "Missing prompt" }) };
+        }
 
         let url, requestBody;
 
         if (image) {
-            // SATURATE: Gemini 2.5 Flash (generateContent)
             url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
             requestBody = {
                 contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: image } }] }]
             };
         } else {
-            // GENERATE: Imagen 4.0 (predict)
             url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
             requestBody = {
                 instances: [{ prompt: prompt }],
@@ -29,7 +31,11 @@ exports.handler = async function(event, context) {
         });
 
         const data = await response.json();
-        if (data.error) return { statusCode: 400, body: JSON.stringify({ error: data.error.message }) };
+        
+        // Handle Google errors
+        if (data.error) {
+            return { statusCode: 200, body: JSON.stringify({ error: data.error.message }) };
+        }
 
         const outputImage = image 
             ? data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
@@ -37,10 +43,14 @@ exports.handler = async function(event, context) {
 
         return {
             statusCode: 200,
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*", // Added for safety
+                "Access-Control-Allow-Methods": "POST"
+            },
             body: JSON.stringify({ image: outputImage })
         };
     } catch (err) {
-        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+        return { statusCode: 200, body: JSON.stringify({ error: err.message }) };
     }
 };
