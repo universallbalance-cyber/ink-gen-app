@@ -579,22 +579,18 @@
 
         try {
             // FIX: Using Imagen 3.0 as it is the most stable High-Quality model today
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const url = `/.netlify/functions/generate-tattoo`;
             
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    // FIX: 'instances' MUST be an array [] to avoid the 400 error
-                    instances: [
-                        { prompt: `High-quality professional tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }
-                    ], 
-                    parameters: { 
-                        sampleCount: 1,
-                        aspectRatio: "1:1"
-                    } 
-                })
-            });
+			const response = await fetchWithRetry(url, {
+			    method: 'POST',
+			    headers: {'Content-Type': 'application/json'},
+			    body: JSON.stringify({ 
+			        // We just send the raw ingredients. 
+			        // The Netlify Function will cook them into the format Google wants.
+			        prompt: p,
+			        style: selectedStyle 
+			    })
+			});
             
             const res = await response.json();
             
@@ -701,6 +697,7 @@
 </body>
 
 </html>
+
 
 
 
