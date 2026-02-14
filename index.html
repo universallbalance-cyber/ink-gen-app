@@ -577,6 +577,7 @@ async function generate() {
         });
 
         const data = await response.json(); // We use 'data' here
+		console.log("RAW DATA FROM GOOGLE:", data);
             
         // Check for predictions in the 'data' variable
         if(data.predictions?.[0]) {
@@ -665,6 +666,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
