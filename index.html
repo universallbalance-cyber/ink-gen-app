@@ -550,16 +550,21 @@
         };
 
 async function generate() {
-    // 1. Define these variables FIRST so the computer knows what they are
+    // 1. Gather the values from the screen RIGHT NOW
     const style = document.getElementById('styleSelect').value;
     const promptText = promptInput.value;
     const details = document.getElementById('detailsInput')?.value || "";
+
+    if (!promptText) {
+        showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
+        return;
+    }
 
     try {
         loader.style.display = 'block';
         generateBtn.disabled = true;
 
-        // 2. Now the 'fetch' will work because style, promptText, and details are defined
+        // 2. Send the data to your Supabase URL
         const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -570,31 +575,28 @@ async function generate() {
         });
 
         const data = await response.json();
-            
-            if(res.predictions?.[0]) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(0,0,1024,1024);
-                    ctx.drawImage(img, 0, 0, 1024, 1024);
-                    loader.style.display = 'none';
-                    saturateBtn.style.display = 'block';
 
-                    // Only count usage if NOT a Pro user
-                    if (!isPro) {
-                        currentUsage++;
-                        localStorage.setItem('inkGen_usage', currentUsage.toString());
-                    }
-                };
-                img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-            } else { throw new Error("No prediction"); }
-        } catch(e) { 
-            console.error(e);
-            showMessage("STENCIL ENGINE FAILED. RETRYING...");
-            loader.style.display = 'none'; 
+        // 3. Handle the image coming back
+        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            const b64Data = data.predictions[0].bytesBase64Encoded;
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            };
+            img.src = `data:image/png;base64,${b64Data}`;
+        } else {
+            throw new Error("Stencil generation failed");
         }
+    } catch (e) {
+        console.error(e);
+        showMessage("STENCIL ENGINE FAILED. RETRYING...");
+        loader.style.display = 'none';
         generateBtn.disabled = false;
     }
+}
 
        async function saturate() {
     // 1. CLEAR the old "const url = ..." and "apiKey" lines.
@@ -661,6 +663,7 @@ try {
 </body>
 
 </html>
+
 
 
 
