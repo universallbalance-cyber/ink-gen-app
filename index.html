@@ -550,70 +550,80 @@
         };
 
    async function generate() {
-        const p = promptInput.value.trim();
-        if (!p) return;
+    const p = promptInput.value;
+    if (!p) {
+        showMessage("PLEASE ENTER A DESCRIPTION");
+        return;
+    }
 
-        // --- 1. THE SECRET PASSWORD CHECK ---
-         try {
-            if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
-                localStorage.setItem('inkGen_isPro', 'true');
-                promptInput.value = ''; // Clear the box
-                showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
-                return; // Stop here so it doesn't waste an API call
-            }
-        } catch(e) {}
-
-        // --- 2. THE LIMIT CHECK ---
-        const isPro = localStorage.getItem('inkGen_isPro') === 'true';
-        let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
-
-        if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-            showMessage(`DAILY LIMIT REACHED. PLEASE UPGRADE.`);
-            return; 
-        }
-
-        // --- 4. START THE ACTUAL GENERATION ---
+    try {
         loader.style.display = 'flex';
         generateBtn.disabled = true;
-        saturateBtn.style.display = 'none';
 
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
-                    parameters: { sampleCount: 1 } 
-                })
-            });
-            
-            const res = await response.json();
-            
-            if(res.predictions?.[0]) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(0,0,1024,1024);
-                    ctx.drawImage(img, 0, 0, 1024, 1024);
-                    loader.style.display = 'none';
-                    saturateBtn.style.display = 'block';
+        // Using the model name that worked for you previously
+        const model = "imagen-3.0-generate-001"; 
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
 
-                    // Only count usage if NOT a Pro user
-                    if (!isPro) {
-                        currentUsage++;
-                        localStorage.setItem('inkGen_usage', currentUsage.toString());
+        // FIX: Reverting to the correct 'instances' structure for the Image model
+        // Note: If you use the Gemini Text model, it uses 'contents'. 
+        // For Imagen (Art), it uses 'instances'. 
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                instances: [
+                    { 
+                        prompt: `Professional high-detail tattoo design, ${selectedStyle} style, ${p}, on an isolated plain white background, sharp lines, masterpiece.` 
                     }
-                };
-                img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-            } else { throw new Error("No prediction"); }
-        } catch(e) { 
-            console.error(e);
-            showMessage("STENCIL ENGINE FAILED. RETRYING...");
-            loader.style.display = 'none'; 
+                ],
+                parameters: {
+                    sampleCount: 1,
+                    aspectRatio: "1:1",
+                    safetySetting: "block_low_and_above"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("API ERROR DETAILS:", errorData);
+            throw new Error(`API Error: ${response.status}`);
         }
+
+        const data = await response.json();
+        
+        // Extracting the image data from the Imagen response format
+        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            const base64Data = data.predictions[0].bytesBase64Encoded;
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, 1024, 1024);
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+                saturateBtn.style.display = 'block';
+                showMessage("ETCHING COMPLETE");
+            };
+            img.src = `data:image/png;base64,${base64Data}`;
+        } else {
+            throw new Error("PIGMENT DATA MISSING");
+        }
+
+    } catch (e) {
+        console.error("GENERATE ERROR:", e);
+        loader.style.display = 'none';
         generateBtn.disabled = false;
+        
+        // Custom message for the most common local dev error
+        if (e.message.includes("fetch") || e.message.includes("403")) {
+            showMessage("CORS ERROR: TURN ON THE CHROME EXTENSION");
+        } else {
+            showMessage("ENGINE ERROR: " + e.message);
+        }
     }
+}
 
         async function saturate() {
             loader.style.display = 'flex';
@@ -688,3 +698,4 @@
 </body>
 
 </html>
+
