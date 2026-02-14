@@ -420,7 +420,7 @@
         const homePage = document.getElementById('homePage');
         const studioPage = document.getElementById('studioPage');
         const canvas = document.getElementById('tattooCanvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d');
         const artFrame = document.getElementById('artFrame');
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
@@ -549,116 +549,114 @@
             return map[style] || map.fineline;
         };
 
-async function generate() {
-    const promptText = promptInput.value;
-    const style = getStylePrompt(selectedStyle);
-    const details = ""; // You can add a details input later if you want
+   async function generate() {
+        const p = promptInput.value.trim();
+        if (!p) return;
 
-    if (!promptText) {
-        showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
-        return;
-    }
+        // --- 1. THE SECRET PASSWORD CHECK ---
+         try {
+            if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
+                localStorage.setItem('inkGen_isPro', 'true');
+                promptInput.value = ''; // Clear the box
+                showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
+                return; // Stop here so it doesn't waste an API call
+            }
+        } catch(e) {}
 
-    try {
-        // 1. Show loader and disable button
+        // --- 2. THE LIMIT CHECK ---
+        const isPro = localStorage.getItem('inkGen_isPro') === 'true';
+        let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+
+        if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
+            showMessage(`DAILY LIMIT REACHED. PLEASE UPGRADE.`);
+            return; 
+        }
+
+        // --- 4. START THE ACTUAL GENERATION ---
         loader.style.display = 'flex';
         generateBtn.disabled = true;
+        saturateBtn.style.display = 'none';
 
-        // 2. Call your Supabase Edge Function
-        const response = await fetch(window.SUPABASE_URL, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}` 
-            },
-            body: JSON.stringify({ 
-                prompt: `${style} tattoo of ${promptText}. ${details}`,
-                type: 'image' 
-            })
-        });
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const response = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
+                    parameters: { sampleCount: 1 } 
+                })
+            });
+            
+            const res = await response.json();
+            
+            if(res.predictions?.[0]) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0,0,1024,1024);
+                    ctx.drawImage(img, 0, 0, 1024, 1024);
+                    loader.style.display = 'none';
+                    saturateBtn.style.display = 'block';
 
-        const data = await response.json();
-        
-        // 3. Log the data so we can see it in the Inspect Console
-        console.log("FULL RESPONSE FROM SUPABASE:", data);
-
-        // 4. Handle the image data (Imagen 3 format)
-        if (data.predictions && data.predictions[0]) {
-            const base64Data = data.predictions[0].bytesBase64Encoded;
-            const img = new Image();
-            
-            img.onload = () => {
-                // Clear canvas and draw the new tattoo
-                ctx.fillStyle = "white";
-                ctx.fillRect(0, 0, 1024, 1024);
-                ctx.drawImage(img, 0, 0, 1024, 1024);
-                
-                // UI Updates
-                loader.style.display = 'none';
-                generateBtn.disabled = false;
-                if(typeof saturateBtn !== 'undefined') saturateBtn.style.display = 'block';
-            };
-            
-            img.src = `data:image/png;base64,${base64Data}`;
-            
-        } else if (data.error) {
-            // Handle specific Google/Supabase errors
-            throw new Error(data.error.message);
-        } else {
-            throw new Error("No image data found in response.");
+                    // Only count usage if NOT a Pro user
+                    if (!isPro) {
+                        currentUsage++;
+                        localStorage.setItem('inkGen_usage', currentUsage.toString());
+                    }
+                };
+                img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
+            } else { throw new Error("No prediction"); }
+        } catch(e) { 
+            console.error(e);
+            showMessage("STENCIL ENGINE FAILED. RETRYING...");
+            loader.style.display = 'none'; 
         }
-
-    } catch(e) { 
-        console.error("GENERATION ERROR:", e);
-        showMessage("ENGINE ERROR: " + e.message);
-        loader.style.display = 'none'; 
         generateBtn.disabled = false;
     }
-}
 
-function saturate() {
-    try {
-        // 1. Check if the canvas is actually ready
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // 2. High-intensity settings for clear visual feedback
-        const saturation = 2.5; 
-        const contrast = 1.2;
-        const intercept = 128 * (1 - contrast);
-
-        for (let i = 0; i < data.length; i += 4) {
-            // Get original RGB
-            let r = data[i], g = data[i+1], b = data[i+2];
-
-            // Calculate brightness using weighted luminance
-            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-
-            // Apply Saturation: Move colors away from the gray value
-            r = gray + (r - gray) * saturation;
-            g = gray + (g - gray) * saturation;
-            b = gray + (b - gray) * saturation;
-
-            // Apply Contrast and update the array with Clamping
-            data[i]     = Math.max(0, Math.min(255, r * contrast + intercept));
-            data[i + 1] = Math.max(0, Math.min(255, g * contrast + intercept));
-            data[i + 2] = Math.max(0, Math.min(255, b * contrast + intercept));
+        async function saturate() {
+            loader.style.display = 'flex';
+            saturateBtn.disabled = true;
+            try {
+                const b64 = canvas.toDataURL('image/png').split(',')[1];
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+                
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ 
+                            parts: [
+                                { text: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet." }, 
+                                { inlineData: { mimeType: "image/png", data: b64 } }
+                            ] 
+                        }],
+                        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+                    })
+                });
+                
+                const res = await response.json();
+                const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                
+                if(colorData) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
+                        ctx.drawImage(img, 0, 0, 1024, 1024);
+                        loader.style.display = 'none';
+                        saturateBtn.style.display = 'none'; 
+                        saturateBtn.disabled = false;
+                    };
+                    img.src = `data:image/png;base64,${colorData}`;
+                } else { throw new Error("No pigment returned"); }
+            } catch(e) { 
+                console.error(e);
+                showMessage("PIGMENT ENGINE FAILED. RETRYING...");
+                loader.style.display = 'none'; 
+                saturateBtn.disabled = false;
+            }
         }
-
-        // 3. Force the canvas to accept the new pixel data
-        ctx.putImageData(imageData, 0, 0);
-
-        // 4. Force a browser redraw
-        canvas.style.display = 'none';
-        canvas.offsetHeight; // This line forces a "reflow"
-        canvas.style.display = 'block';
-
-        showMessage("PIGMENT BOOSTED");
-    } catch(e) { 
-        console.error("SATURATION ERROR:", e);
-        showMessage("PIGMENT ENGINE FAILED");
-    }
-}
 
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
@@ -690,61 +688,3 @@ function saturate() {
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
