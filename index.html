@@ -552,6 +552,7 @@
    async function generate() {
     // 1. CLEAR the old "const url = ..." and "apiKey" lines. 
     // They are no longer needed here!
+	   const style = document.getElementById('styleSelect').value;
 
 try {
     const response = await fetch(window.SUPABASE_URL, {
@@ -655,6 +656,7 @@ try {
 </body>
 
 </html>
+
 
 
 
