@@ -550,45 +550,20 @@
         };
 
    async function generate() {
-        const p = promptInput.value.trim();
-        if (!p) return;
+    // 1. CLEAR the old "const url = ..." and "apiKey" lines. 
+    // They are no longer needed here!
 
-        // --- 1. THE SECRET PASSWORD CHECK ---
-         try {
-            if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
-                localStorage.setItem('inkGen_isPro', 'true');
-                promptInput.value = ''; // Clear the box
-                showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
-                return; // Stop here so it doesn't waste an API call
-            }
-        } catch(e) {}
+    try {
+        // 2. ONLY use the Supabase URL
+        const response = await fetch(window.SUPABASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: `${style} tattoo of ${promptText}. ${details}` 
+            })
+        });
 
-        // --- 2. THE LIMIT CHECK ---
-        const isPro = localStorage.getItem('inkGen_isPro') === 'true';
-        let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
-
-        if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-            showMessage(`DAILY LIMIT REACHED. PLEASE UPGRADE.`);
-            return; 
-        }
-
-        // --- 4. START THE ACTUAL GENERATION ---
-        loader.style.display = 'flex';
-        generateBtn.disabled = true;
-        saturateBtn.style.display = 'none';
-
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
-                    parameters: { sampleCount: 1 } 
-                })
-            });
-            
-            const res = await response.json();
+        const data = await response.json();
             
             if(res.predictions?.[0]) {
                 const img = new Image();
@@ -615,28 +590,23 @@
         generateBtn.disabled = false;
     }
 
-        async function saturate() {
-            loader.style.display = 'flex';
-            saturateBtn.disabled = true;
-            try {
-                const b64 = canvas.toDataURL('image/png').split(',')[1];
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
-                
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [
-                                { text: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet." }, 
-                                { inlineData: { mimeType: "image/png", data: b64 } }
-                            ] 
-                        }],
-                        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-                    })
-                });
-                
-                const res = await response.json();
+       async function saturate() {
+    // 1. CLEAR the old "const url = ..." and "apiKey" lines.
+    
+    try {
+        loader.style.display = 'block';
+        saturateBtn.disabled = true;
+
+        // 2. Use the Supabase URL instead of the Google URL
+        const response = await fetch(window.SUPABASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: `Apply a saturated pigment style to this tattoo description: ${promptInput.value}` 
+            })
+        });
+
+        const data = await response.json();
                 const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
                 
                 if(colorData) {
@@ -688,6 +658,7 @@
 </body>
 
 </html>
+
 
 
 
