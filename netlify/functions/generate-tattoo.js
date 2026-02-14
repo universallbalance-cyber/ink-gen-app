@@ -1,26 +1,22 @@
-exports.handler = async (event) => {
-    const { prompt, image } = JSON.parse(event.body);
-    const apiKey = process.env.GEMINI_API_KEY;
+exports.handler = async function(event, context) {
+    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
     try {
-        let url;
-        let body;
+        const { prompt, image } = JSON.parse(event.body);
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        let url, requestBody;
 
         if (image) {
-            // GEMINI 2.5 FLASH (Saturate)
+            // SATURATE: Gemini 2.5 Flash (generateContent)
             url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
-            body = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inlineData: { mimeType: "image/png", data: image } }
-                    ]
-                }]
+            requestBody = {
+                contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: image } }] }]
             };
         } else {
-            // IMAGEN 4.0 (Generate)
+            // GENERATE: Imagen 4.0 (predict)
             url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-            body = {
+            requestBody = {
                 instances: [{ prompt: prompt }],
                 parameters: { sampleCount: 1 }
             };
@@ -29,35 +25,22 @@ exports.handler = async (event) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
+        if (data.error) return { statusCode: 400, body: JSON.stringify({ error: data.error.message }) };
 
-        // Check if Google sent an error back
-        if (data.error) {
-            throw new Error(data.error.message || "Google API Error");
-        }
-
-        // Extract image based on which model responded
         const outputImage = image 
             ? data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
             : data.predictions?.[0]?.bytesBase64Encoded;
 
-        if (!outputImage) {
-            throw new Error("No image data found in response");
-        }
-
         return {
             statusCode: 200,
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ image: outputImage })
         };
-
-    } catch (error) {
-        console.error("Function Error:", error.message);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: error.message })
-        };
+    } catch (err) {
+        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
     }
 };
