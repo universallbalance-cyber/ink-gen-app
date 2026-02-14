@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async (event) => {
     const { prompt, image } = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
@@ -9,7 +7,7 @@ exports.handler = async (event) => {
         let body;
 
         if (image) {
-            // Language for GEMINI 2.5 FLASH (Saturate)
+            // GEMINI 2.5 FLASH (Saturate)
             url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
             body = {
                 contents: [{
@@ -20,7 +18,7 @@ exports.handler = async (event) => {
                 }]
             };
         } else {
-            // Language for IMAGEN 4.0 (Generate)
+            // IMAGEN 4.0 (Generate)
             url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
             body = {
                 instances: [{ prompt: prompt }],
@@ -36,13 +34,18 @@ exports.handler = async (event) => {
 
         const data = await response.json();
 
+        // Check if Google sent an error back
+        if (data.error) {
+            throw new Error(data.error.message || "Google API Error");
+        }
+
         // Extract image based on which model responded
         const outputImage = image 
             ? data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
             : data.predictions?.[0]?.bytesBase64Encoded;
 
         if (!outputImage) {
-            throw new Error(data.error?.message || "Google returned no image data");
+            throw new Error("No image data found in response");
         }
 
         return {
