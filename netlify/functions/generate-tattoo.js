@@ -3,19 +3,14 @@ const fetch = require('node-fetch');
 exports.handler = async (event) => {
     const { prompt, image } = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
-    
-    // Switch models based on whether we are 'Saturating' (image provided) or 'Generating' (no image)
-    const model = image ? "gemini-2.5-flash-image" : "imagen-4.0-generate-001";
-    
-    // The URL changes depending on the model used
-    const url = image 
-        ? `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
-        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
 
     try {
+        let url;
         let body;
+
         if (image) {
-            // Format for Gemini 2.5 Flash (Saturate)
+            // Language for GEMINI 2.5 FLASH (Saturate)
+            url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
             body = {
                 contents: [{
                     parts: [
@@ -25,8 +20,12 @@ exports.handler = async (event) => {
                 }]
             };
         } else {
-            // Format for Imagen 4.0 (Initial Generate)
-            body = { instances: [{ prompt }], parameters: { sampleCount: 1 } };
+            // Language for IMAGEN 4.0 (Generate)
+            url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            body = {
+                instances: [{ prompt: prompt }],
+                parameters: { sampleCount: 1 }
+            };
         }
 
         const response = await fetch(url, {
@@ -36,17 +35,26 @@ exports.handler = async (event) => {
         });
 
         const data = await response.json();
-        
-        // Extract the image string based on which model responded
+
+        // Extract image based on which model responded
         const outputImage = image 
             ? data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
             : data.predictions?.[0]?.bytesBase64Encoded;
+
+        if (!outputImage) {
+            throw new Error(data.error?.message || "Google returned no image data");
+        }
 
         return {
             statusCode: 200,
             body: JSON.stringify({ image: outputImage })
         };
+
     } catch (error) {
-        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+        console.error("Function Error:", error.message);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+        };
     }
 };
