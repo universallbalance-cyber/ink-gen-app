@@ -578,9 +578,9 @@ async function generate() {
         const data = await response.json();
         console.log("FULL RESPONSE:", data);
 
-        // Gemini 2.0 Flash returns the image inside candidates[0].content.parts[0].inlineData
-        if (data.candidates && data.candidates[0].content.parts[0].inlineData) {
-            const base64Data = data.candidates[0].content.parts[0].inlineData.data;
+        if (data.predictions && data.predictions[0]) {
+            // Imagen returns: predictions[0].bytesBase64Encoded
+            const base64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
             img.onload = () => {
                 ctx.fillStyle = "white";
@@ -590,10 +590,9 @@ async function generate() {
                 generateBtn.disabled = false;
             };
             img.src = `data:image/png;base64,${base64Data}`;
-        } else if (data.error) {
-            throw new Error(data.error.message);
         } else {
-            throw new Error("Model didn't return an image. Check console for 'FULL RESPONSE'.");
+            const msg = data.error ? data.error.message : "Check console for FULL RESPONSE";
+            throw new Error(msg);
         }
     } catch(e) { 
         console.error("GENERATION ERROR:", e);
@@ -667,6 +666,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
