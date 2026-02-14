@@ -549,20 +549,25 @@
             return map[style] || map.fineline;
         };
 
-   async function generate() {
-    // 1. CLEAR the old "const url = ..." and "apiKey" lines. 
-    // They are no longer needed here!
-	   const style = document.getElementById('styleSelect').value;
+async function generate() {
+    // 1. Define these variables FIRST so the computer knows what they are
+    const style = document.getElementById('styleSelect').value;
+    const promptText = promptInput.value;
+    const details = document.getElementById('detailsInput')?.value || "";
 
-try {
-    const response = await fetch(window.SUPABASE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ 
-		    prompt: `${style} tattoo of ${promptText}. ${details}`,
-		    type: 'image' 
-		})
-    });
+    try {
+        loader.style.display = 'block';
+        generateBtn.disabled = true;
+
+        // 2. Now the 'fetch' will work because style, promptText, and details are defined
+        const response = await fetch(window.SUPABASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: `${style} tattoo of ${promptText}. ${details}`,
+                type: 'image' 
+            })
+        });
 
         const data = await response.json();
             
@@ -656,6 +661,7 @@ try {
 </body>
 
 </html>
+
 
 
 
