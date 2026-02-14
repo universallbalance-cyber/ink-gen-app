@@ -550,10 +550,12 @@
         };
 
 async function generate() {
-    // 1. Gather the values from the screen RIGHT NOW
-    const style = document.getElementById('styleSelect').value;
+    // 1. We define exactly what these are FIRST
+    const styleSelect = document.getElementById('styleSelect');
+    const style = styleSelect ? styleSelect.value : "Fine Line"; // Fallback if not found
     const promptText = promptInput.value;
-    const details = document.getElementById('detailsInput')?.value || "";
+    const detailsInput = document.getElementById('detailsInput');
+    const details = detailsInput ? detailsInput.value : "";
 
     if (!promptText) {
         showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
@@ -564,7 +566,7 @@ async function generate() {
         loader.style.display = 'block';
         generateBtn.disabled = true;
 
-        // 2. Send the data to your Supabase URL
+        // 2. Now the computer knows what 'style' is, so this won't crash
         const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -576,7 +578,7 @@ async function generate() {
 
         const data = await response.json();
 
-        // 3. Handle the image coming back
+        // 3. Handle the image coming back from Supabase
         if (data.predictions && data.predictions[0].bytesBase64Encoded) {
             const b64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
@@ -591,7 +593,7 @@ async function generate() {
             throw new Error("Stencil generation failed");
         }
     } catch (e) {
-        console.error(e);
+        console.error("DEBUG ERROR:", e); // This helps us see the real error in Console
         showMessage("STENCIL ENGINE FAILED. RETRYING...");
         loader.style.display = 'none';
         generateBtn.disabled = false;
@@ -663,6 +665,7 @@ try {
 </body>
 
 </html>
+
 
 
 
