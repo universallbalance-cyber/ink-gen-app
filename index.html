@@ -557,9 +557,9 @@
          try {
             if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
                 localStorage.setItem('inkGen_isPro', 'true');
-                promptInput.value = ''; // Clear the box
+                promptInput.value = ''; 
                 showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
-                return; // Stop here so it doesn't waste an API call
+                return; 
             }
         } catch(e) {}
 
@@ -578,19 +578,33 @@
         saturateBtn.style.display = 'none';
 
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            // FIX: Using Imagen 3.0 as it is the most stable High-Quality model today
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
+            
             const response = await fetchWithRetry(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
-                    instances: { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }, 
-                    parameters: { sampleCount: 1 } 
+                    // FIX: 'instances' MUST be an array [] to avoid the 400 error
+                    instances: [
+                        { prompt: `Masterpiece tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }
+                    ], 
+                    parameters: { 
+                        sampleCount: 1,
+                        aspectRatio: "1:1"
+                    } 
                 })
             });
             
             const res = await response.json();
             
-            if(res.predictions?.[0]) {
+            // Check for specific API error messages
+            if (!response.ok) {
+                console.error("API Error Details:", res);
+                throw new Error(res.error?.message || `Status ${response.status}`);
+            }
+            
+            if(res.predictions?.[0]?.bytesBase64Encoded) {
                 const img = new Image();
                 img.onload = () => {
                     ctx.fillStyle = "white";
@@ -599,17 +613,16 @@
                     loader.style.display = 'none';
                     saturateBtn.style.display = 'block';
 
-                    // Only count usage if NOT a Pro user
                     if (!isPro) {
                         currentUsage++;
                         localStorage.setItem('inkGen_usage', currentUsage.toString());
                     }
                 };
                 img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-            } else { throw new Error("No prediction"); }
+            } else { throw new Error("No prediction data found"); }
         } catch(e) { 
-            console.error(e);
-            showMessage("STENCIL ENGINE FAILED. RETRYING...");
+            console.error("Critical Engine Error:", e);
+            showMessage("STENCIL ENGINE FAILED. CHECK CONSOLE.");
             loader.style.display = 'none'; 
         }
         generateBtn.disabled = false;
@@ -688,6 +701,7 @@
 </body>
 
 </html>
+
 
 
 
