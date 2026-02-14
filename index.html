@@ -557,10 +557,10 @@ try {
     const response = await fetch(window.SUPABASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            prompt: `${style} tattoo of ${promptText}. ${details}`,
-            type: 'image' // This tells Supabase to use the Imagen model
-        })
+		body: JSON.stringify({ 
+		    prompt: `${style} tattoo of ${promptText}. ${details}`,
+		    type: 'image' 
+		})
     });
 
         const data = await response.json();
@@ -597,10 +597,10 @@ try {
     const response = await fetch(window.SUPABASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            prompt: `Apply a saturated pigment style to this tattoo description: ${promptInput.value}`,
-            type: 'text' // This tells Supabase to use the Gemini Pro model
-        })
+		body: JSON.stringify({ 
+		    prompt: `Apply a saturated pigment style to...`,
+		    type: 'text' 
+		})
     });
 
         const data = await response.json();
@@ -655,6 +655,7 @@ try {
 </body>
 
 </html>
+
 
 
 
