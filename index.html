@@ -628,21 +628,15 @@
             saturateBtn.disabled = true;
             try {
                 const b64 = canvas.toDataURL('image/png').split(',')[1];
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+                const url = `/.netlify/functions/generate-tattoo`;
                 
                 const response = await fetchWithRetry(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [
-                                { text: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet." }, 
-                                { inlineData: { mimeType: "image/png", data: b64 } }
-                            ] 
-                        }],
-                        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-                    })
-                });
+					body: JSON.stringify({ 
+					    prompt: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design.",
+					    image: b64 // This sends the line art to the function
+					})
                 
                 const res = await response.json();
                 const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
@@ -696,6 +690,7 @@
 </body>
 
 </html>
+
 
 
 
