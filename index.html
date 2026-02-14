@@ -623,43 +623,48 @@
         generateBtn.disabled = false;
     }
 
-        async function saturate() {
-            loader.style.display = 'flex';
-            saturateBtn.disabled = true;
-            try {
-                const b64 = canvas.toDataURL('image/png').split(',')[1];
-                const url = `/.netlify/functions/generate-tattoo`;
-                
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({ 
-					    prompt: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design.",
-					    image: b64 // This sends the line art to the function
-					})
-                
-                const res = await response.json();
-                const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                
-                if(colorData) {
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-                        ctx.drawImage(img, 0, 0, 1024, 1024);
-                        loader.style.display = 'none';
-                        saturateBtn.style.display = 'none'; 
-                        saturateBtn.disabled = false;
-                    };
-                    img.src = `data:image/png;base64,${colorData}`;
-                } else { throw new Error("No pigment returned"); }
-            } catch(e) { 
-                console.error(e);
-                showMessage("PIGMENT ENGINE FAILED. RETRYING...");
-                loader.style.display = 'none'; 
+       async function saturate() {
+    loader.style.display = 'flex';
+    saturateBtn.disabled = true;
+    try {
+        const b64 = canvas.toDataURL('image/png').split(',')[1];
+        const url = `/.netlify/functions/generate-tattoo`;
+        
+        const response = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                prompt: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet.",
+                image: b64 
+            })
+        }); // Added the missing bracket and semicolon here
+        
+        const res = await response.json();
+        
+        // Updated to match the data format your Netlify function sends back
+        const colorData = res.image;
+        
+        if(colorData) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.fillStyle = "white"; 
+                ctx.fillRect(0, 0, 1024, 1024);
+                ctx.drawImage(img, 0, 0, 1024, 1024);
+                loader.style.display = 'none';
+                saturateBtn.style.display = 'none'; 
                 saturateBtn.disabled = false;
-            }
+            };
+            img.src = `data:image/png;base64,${colorData}`;
+        } else { 
+            throw new Error("No pigment returned"); 
         }
-
+    } catch(e) { 
+        console.error(e);
+        showMessage("PIGMENT ENGINE FAILED. RETRYING...");
+        loader.style.display = 'none'; 
+        saturateBtn.disabled = false;
+    }
+}
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
         
@@ -690,6 +695,7 @@
 </body>
 
 </html>
+
 
 
 
