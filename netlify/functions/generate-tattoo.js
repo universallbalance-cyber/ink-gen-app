@@ -7,7 +7,7 @@ exports.handler = async (event) => {
     // 2. Grab the API Key from the Netlify "Vault" we set up yesterday
     const apiKey = process.env.GOOGLE_API_KEY;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
 
     // 3. This is the "Google Paperwork" you were worried about
     // We do it here so it's hidden from the public!
