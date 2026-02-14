@@ -1,2 +1,2 @@
 window.SUPABASE_URL = "https://helkjzzgtnrcvrhmizzy.supabase.co/functions/v1/gemini-proxy";
-window.SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlbGtqenpndG5yY3ZyaG1penp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NjYzMzQsImV4cCI6MjA3NjA0MjMzNH0.uEEOpPgEi8KTJ06msrx1LHnk6P1M_gvyiIIM8S6NSgc";
