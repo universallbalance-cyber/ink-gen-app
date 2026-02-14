@@ -575,25 +575,25 @@ async function generate() {
             })
         });
 
-        const data = await response.json(); 
-        
-        // This is the line we need to see in the Console!
-        console.log("FULL RESPONSE FROM SUPABASE:", data);
-            
-        if (data.predictions && data.predictions[0]) {
+        const data = await response.json();
+        console.log("FULL RESPONSE:", data);
+
+        // Gemini 2.0 Flash returns the image inside candidates[0].content.parts[0].inlineData
+        if (data.candidates && data.candidates[0].content.parts[0].inlineData) {
+            const base64Data = data.candidates[0].content.parts[0].inlineData.data;
             const img = new Image();
             img.onload = () => {
                 ctx.fillStyle = "white";
                 ctx.fillRect(0, 0, 1024, 1024);
                 ctx.drawImage(img, 0, 0, 1024, 1024);
                 loader.style.display = 'none';
-                saturateBtn.style.display = 'block';
                 generateBtn.disabled = false;
             };
-            img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-        } else { 
-            // If data exists but 'predictions' doesn't, we'll see why in the console log above
-            throw new Error("No prediction returned from engine"); 
+            img.src = `data:image/png;base64,${base64Data}`;
+        } else if (data.error) {
+            throw new Error(data.error.message);
+        } else {
+            throw new Error("Model didn't return an image. Check console for 'FULL RESPONSE'.");
         }
     } catch(e) { 
         console.error("GENERATION ERROR:", e);
@@ -667,6 +667,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
