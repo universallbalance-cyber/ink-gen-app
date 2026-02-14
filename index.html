@@ -550,9 +550,15 @@
         };
 
 async function generate() {
-    const style = getStylePrompt(selectedStyle); // Fixes the style error
+    // 1. Define these variables so the browser knows what they are
+    const style = getStylePrompt(selectedStyle); 
     const promptText = promptInput.value;
-    const details = ""; // Add extra details here if needed
+    const details = ""; 
+
+    if (!promptText) {
+        showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
+        return;
+    }
 
     try {
         loader.style.display = 'flex';
@@ -563,12 +569,13 @@ async function generate() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 prompt: `${style} tattoo of ${promptText}. ${details}`,
-                type: 'image' 
+                type: 'image' // Tells Supabase to use the Image model
             })
         });
 
-        const data = await response.json(); // Use 'data' consistently
+        const data = await response.json(); // We use 'data' here
             
+        // Check for predictions in the 'data' variable
         if(data.predictions?.[0]) {
             const img = new Image();
             img.onload = () => {
@@ -580,49 +587,50 @@ async function generate() {
                 generateBtn.disabled = false;
             };
             img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-        } else { throw new Error("No prediction"); }
+        } else { 
+            throw new Error("No prediction returned from engine"); 
+        }
     } catch(e) { 
-        console.error(e);
+        console.error("GENERATION ERROR:", e);
         showMessage("STENCIL ENGINE FAILED. RETRYING...");
         loader.style.display = 'none'; 
         generateBtn.disabled = false;
     }
 }
 
-       async function saturate() {
-    // 1. CLEAR the old "const url = ..." and "apiKey" lines.
-    
-try {
-    const response = await fetch(window.SUPABASE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ 
-		    prompt: `Apply a saturated pigment style to...`,
-		    type: 'text' 
-		})
-    });
+ async function saturate() {
+    try {
+        loader.style.display = 'block';
+        saturateBtn.disabled = true;
 
-        const data = await response.json();
-                const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                
-                if(colorData) {
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-                        ctx.drawImage(img, 0, 0, 1024, 1024);
-                        loader.style.display = 'none';
-                        saturateBtn.style.display = 'none'; 
-                        saturateBtn.disabled = false;
-                    };
-                    img.src = `data:image/png;base64,${colorData}`;
-                } else { throw new Error("No pigment returned"); }
-            } catch(e) { 
-                console.error(e);
-                showMessage("PIGMENT ENGINE FAILED. RETRYING...");
-                loader.style.display = 'none'; 
-                saturateBtn.disabled = false;
-            }
+        const response = await fetch(window.SUPABASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: `Apply a saturated pigment style to this tattoo description: ${promptInput.value}`,
+                type: 'text' // Tells Supabase to use the Text model
+            })
+        });
+
+        const data = await response.json(); // We use 'data' here
+
+        // Correctly find the text result from Gemini Pro
+        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const saturatedText = data.candidates[0].content.parts[0].text;
+            promptInput.value = saturatedText; // Update your prompt with the "saturated" description
+            
+            // Now run generate again automatically with the new color description
+            generate(); 
+        } else { 
+            throw new Error("No pigment returned"); 
         }
+    } catch(e) { 
+        console.error("SATURATION ERROR:", e);
+        showMessage("PIGMENT ENGINE FAILED. RETRYING...");
+        loader.style.display = 'none'; 
+        saturateBtn.disabled = false;
+    }
+}
 
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
@@ -654,6 +662,7 @@ try {
 </body>
 
 </html>
+
 
 
 
