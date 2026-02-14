@@ -550,23 +550,14 @@
         };
 
 async function generate() {
-    // 1. We define exactly what these are FIRST
-    const styleSelect = document.getElementById('styleSelect');
-    const style = styleSelect ? styleSelect.value : "Fine Line"; // Fallback if not found
+    const style = getStylePrompt(selectedStyle); // Fixes the style error
     const promptText = promptInput.value;
-    const detailsInput = document.getElementById('detailsInput');
-    const details = detailsInput ? detailsInput.value : "";
-
-    if (!promptText) {
-        showMessage("PLEASE ENTER A DESIGN DESCRIPTION");
-        return;
-    }
+    const details = ""; // Add extra details here if needed
 
     try {
-        loader.style.display = 'block';
+        loader.style.display = 'flex';
         generateBtn.disabled = true;
 
-        // 2. Now the computer knows what 'style' is, so this won't crash
         const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -576,26 +567,24 @@ async function generate() {
             })
         });
 
-        const data = await response.json();
-
-        // 3. Handle the image coming back from Supabase
-        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
-            const b64Data = data.predictions[0].bytesBase64Encoded;
+        const data = await response.json(); // Use 'data' consistently
+            
+        if(data.predictions?.[0]) {
             const img = new Image();
             img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "white";
+                ctx.fillRect(0,0,1024,1024);
+                ctx.drawImage(img, 0, 0, 1024, 1024);
                 loader.style.display = 'none';
+                saturateBtn.style.display = 'block';
                 generateBtn.disabled = false;
             };
-            img.src = `data:image/png;base64,${b64Data}`;
-        } else {
-            throw new Error("Stencil generation failed");
-        }
-    } catch (e) {
-        console.error("DEBUG ERROR:", e); // This helps us see the real error in Console
+            img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+        } else { throw new Error("No prediction"); }
+    } catch(e) { 
+        console.error(e);
         showMessage("STENCIL ENGINE FAILED. RETRYING...");
-        loader.style.display = 'none';
+        loader.style.display = 'none'; 
         generateBtn.disabled = false;
     }
 }
@@ -665,6 +654,7 @@ try {
 </body>
 
 </html>
+
 
 
 
