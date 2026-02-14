@@ -564,9 +564,12 @@ async function generate() {
         loader.style.display = 'flex';
         generateBtn.disabled = true;
 
-        const response = await fetch(window.SUPABASE_URL, {
+		const response = await fetch(window.SUPABASE_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}` 
+            },
             body: JSON.stringify({ 
                 prompt: `${style} tattoo of ${promptText}. ${details}`,
                 type: 'image' // Tells Supabase to use the Image model
@@ -662,6 +665,7 @@ async function generate() {
 </body>
 
 </html>
+
 
 
 
