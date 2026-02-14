@@ -579,7 +579,7 @@
 
         try {
             // FIX: Using Imagen 3.0 as it is the most stable High-Quality model today
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
             
             const response = await fetchWithRetry(url, {
                 method: 'POST',
@@ -701,6 +701,7 @@
 </body>
 
 </html>
+
 
 
 
