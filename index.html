@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta name="referrer" content="no-referrer-when-downgrade">
+  <script src="env.js"></script>
 	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="shortcut icon" href="/favicon.ico" />
@@ -578,18 +579,22 @@
 
         try {
             // FIX: Using Imagen 3.0 as it is the most stable High-Quality model today
-            const url = `/.netlify/functions/generate-tattoo`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
             
-			const response = await fetchWithRetry(url, {
-			    method: 'POST',
-			    headers: {'Content-Type': 'application/json'},
-			    body: JSON.stringify({ 
-			        // We just send the raw ingredients. 
-			        // The Netlify Function will cook them into the format Google wants.
-			        prompt: p,
-			        style: selectedStyle 
-			    })
-			});
+            const response = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    // FIX: 'instances' MUST be an array [] to avoid the 400 error
+                    instances: [
+                        { prompt: `High-quality professional tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }
+                    ], 
+                    parameters: { 
+                        sampleCount: 1,
+                        aspectRatio: "1:1"
+                    } 
+                })
+            });
             
             const res = await response.json();
             
@@ -623,48 +628,49 @@
         generateBtn.disabled = false;
     }
 
-       async function saturate() {
-    loader.style.display = 'flex';
-    saturateBtn.disabled = true;
-    try {
-        const b64 = canvas.toDataURL('image/png').split(',')[1];
-        const url = `/.netlify/functions/generate-tattoo`;
-        
-        const response = await fetchWithRetry(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                prompt: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet.",
-                image: b64 
-            })
-        }); // Added the missing bracket and semicolon here
-        
-        const res = await response.json();
-        
-        // Updated to match the data format your Netlify function sends back
-        const colorData = res.image;
-        
-        if(colorData) {
-            const img = new Image();
-            img.onload = () => {
-                ctx.fillStyle = "white"; 
-                ctx.fillRect(0, 0, 1024, 1024);
-                ctx.drawImage(img, 0, 0, 1024, 1024);
-                loader.style.display = 'none';
-                saturateBtn.style.display = 'none'; 
+        async function saturate() {
+            loader.style.display = 'flex';
+            saturateBtn.disabled = true;
+            try {
+                const b64 = canvas.toDataURL('image/png').split(',')[1];
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+                
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ 
+                            parts: [
+                                { text: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet." }, 
+                                { inlineData: { mimeType: "image/png", data: b64 } }
+                            ] 
+                        }],
+                        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+                    })
+                });
+                
+                const res = await response.json();
+                const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                
+                if(colorData) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
+                        ctx.drawImage(img, 0, 0, 1024, 1024);
+                        loader.style.display = 'none';
+                        saturateBtn.style.display = 'none'; 
+                        saturateBtn.disabled = false;
+                    };
+                    img.src = `data:image/png;base64,${colorData}`;
+                } else { throw new Error("No pigment returned"); }
+            } catch(e) { 
+                console.error(e);
+                showMessage("PIGMENT ENGINE FAILED. RETRYING...");
+                loader.style.display = 'none'; 
                 saturateBtn.disabled = false;
-            };
-            img.src = `data:image/png;base64,${colorData}`;
-        } else { 
-            throw new Error("No pigment returned"); 
+            }
         }
-    } catch(e) { 
-        console.error(e);
-        showMessage("PIGMENT ENGINE FAILED. RETRYING...");
-        loader.style.display = 'none'; 
-        saturateBtn.disabled = false;
-    }
-}
+
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
         
@@ -695,11 +701,6 @@
 </body>
 
 </html>
-
-
-
-
-
 
 
 
