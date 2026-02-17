@@ -423,23 +423,16 @@
             setTimeout(() => { notification.style.display = 'none'; }, 5000);
         }
 
-        // --- ENHANCED RESILIENT DATA PARSER ---
         function findBase64(obj) {
             if (!obj || typeof obj !== 'object') return null;
-            
-            // 1. Direct key search in current object level
             const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text', 'content', 'b64_json', 'imageUrl'];
             for (const key of keys) {
                 if (typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
             }
-            
-            // 2. If it's an array, look inside the first item
             if (Array.isArray(obj) && obj.length > 0) {
                 const foundInArr = findBase64(obj[0]);
                 if (foundInArr) return foundInArr;
             }
-            
-            // 3. Recursive deep search for any string that looks like base64
             for (const key in obj) {
                 if (typeof obj[key] === 'object' && obj[key] !== null) {
                     const found = findBase64(obj[key]);
@@ -451,12 +444,11 @@
 
         function cleanBase64(str) {
             if (!str) return "";
-            // Remove markdown formatting, newlines, and data-uri headers
             return str.trim()
-                .replace(/^```[a-z]*\s*/i, "") // remove opening markdown code block
-                .replace(/\s*```$/i, "")        // remove closing markdown code block
-                .replace(/[\s\n\r]/g, "")       // remove all whitespaces/newlines
-                .replace(/^data:image\/[a-z]+;base64,/, ""); // remove data uri prefix
+                .replace(/^```[a-z]*\s*/i, "")
+                .replace(/\s*```$/i, "")
+                .replace(/[\s\n\r]/g, "")
+                .replace(/^data:image\/[a-z]+;base64,/, "");
         }
 
         function init() {
@@ -528,8 +520,15 @@
                 const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors', // Explicitly enable CORS
+                    credentials: 'omit', // Prevent sending cookies which can trigger CORS blocks
                     body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " tattoo " + promptInput.value + " on white background" })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
                 const data = await response.json();
                 const rawB64 = findBase64(data);
                 if (rawB64) {
@@ -546,10 +545,10 @@
                     img.src = `data:image/png;base64,${b64}`;
                 } else throw new Error("No image data found in response");
             } catch (e) {
-                console.error("Gen Error:", e);
+                console.error("Critical Engine Error:", e);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
-                showMessage("STENCIL ENGINE OFFLINE");
+                showMessage("ENGINE OFFLINE: CHECK CONSOLE");
             }
         }
 
@@ -561,8 +560,15 @@
                 const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify({ action: 'saturate', image: currentImg })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
                 const data = await response.json();
                 const rawB64 = findBase64(data);
                 if (rawB64) {
@@ -576,7 +582,7 @@
                     img.src = `data:image/png;base64,${b64}`;
                 } else throw new Error("No color data found in response");
             } catch (e) {
-                console.error("Saturate Error:", e);
+                console.error("Critical Saturate Error:", e);
                 loader.style.display = 'none';
                 saturateBtn.disabled = false;
                 showMessage("COLOR ENGINE OFFLINE");
