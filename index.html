@@ -599,8 +599,11 @@ async function generate() {
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
                 
-                // 4. REVEAL COLOR BUTTON
-		if(satBtn) satBtn.style.setProperty('display', 'flex', 'important'); 
+                // 4. REVEAL COLOR BUTTON (using the override)
+                if(saturateBtn) {
+                    saturateBtn.style.setProperty('display', 'flex', 'important');
+                }
+            };
             img.src = `data:image/png;base64,${base64Data}`;
         } else {
             throw new Error("Design generation failed");
@@ -693,6 +696,7 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
 
