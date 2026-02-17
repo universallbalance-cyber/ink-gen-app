@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta name="referrer" content="no-referrer-when-downgrade">
-  <script src="env.js"></script>
-	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="shortcut icon" href="/favicon.ico" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -549,127 +548,93 @@
             return map[style] || map.fineline;
         };
 
-   async function generate() {
-        const p = promptInput.value.trim();
-        if (!p) return;
+  // 1. UPDATE THE GENERATE FUNCTION
+async function generate() {
+    const prompt = document.getElementById('prompt').value;
+    if (!prompt) return showMessage("ENTER A DESIGN CONCEPT");
 
-        // --- 1. THE SECRET PASSWORD CHECK ---
-         try {
-            if (btoa(p) === 'SU5LLUJPVFMtMjAyNg==') {
-                localStorage.setItem('inkGen_isPro', 'true');
-                promptInput.value = ''; 
-                showMessage("PRO STATUS ACTIVATED. UNLIMITED ACCESS GRANTED.");
-                return; 
-            }
-        } catch(e) {}
+    const generateBtn = document.getElementById('generateBtn');
+    const loader = document.getElementById('loader');
 
-        // --- 2. THE LIMIT CHECK ---
-        const isPro = localStorage.getItem('inkGen_isPro') === 'true';
-        let currentUsage = parseInt(localStorage.getItem('inkGen_usage') || '0');
-
-        if (!isPro && currentUsage >= CONFIG.MAX_FREE_LIMIT) {
-            showMessage(`DAILY LIMIT REACHED. PLEASE UPGRADE.`);
-            return; 
-        }
-
-        // --- 4. START THE ACTUAL GENERATION ---
-        loader.style.display = 'flex';
+    try {
         generateBtn.disabled = true;
-        saturateBtn.style.display = 'none';
+        loader.style.display = 'flex';
 
-        try {
-            // FIX: Using Imagen 3.0 as it is the most stable High-Quality model today
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-            
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    // FIX: 'instances' MUST be an array [] to avoid the 400 error
-                    instances: [
-                        { prompt: `High-quality professional tattoo stencil: ${p}. ${getStylePrompt(selectedStyle)}. Pure white background (#FFFFFF). High resolution line art.` }
-                    ], 
-                    parameters: { 
-                        sampleCount: 1,
-                        aspectRatio: "1:1"
-                    } 
-                })
-            });
-            
-            const res = await response.json();
-            
-            // Check for specific API error messages
-            if (!response.ok) {
-                console.error("API Error Details:", res);
-                throw new Error(res.error?.message || `Status ${response.status}`);
-            }
-            
-            if(res.predictions?.[0]?.bytesBase64Encoded) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(0,0,1024,1024);
-                    ctx.drawImage(img, 0, 0, 1024, 1024);
-                    loader.style.display = 'none';
-                    saturateBtn.style.display = 'block';
+        // CALLING YOUR SECURE BRIDGE
+        const response = await fetch('PASTE_YOUR_RUN_APP_URL_HERE', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'generate', prompt: prompt })
+        });
 
-                    if (!isPro) {
-                        currentUsage++;
-                        localStorage.setItem('inkGen_usage', currentUsage.toString());
-                    }
-                };
-                img.src = `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-            } else { throw new Error("No prediction data found"); }
-        } catch(e) { 
-            console.error("Critical Engine Error:", e);
-            showMessage("STENCIL ENGINE FAILED. CHECK CONSOLE.");
-            loader.style.display = 'none'; 
+        const data = await response.json();
+        
+        // Handle the image data coming back from your bridge
+        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            const base64Data = data.predictions[0].bytesBase64Encoded;
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            };
+            img.src = `data:image/png;base64,${base64Data}`;
+        } else {
+            throw new Error("Design generation failed");
         }
+    } catch (e) {
+        console.error(e);
+        showMessage("STENCIL ENGINE OFFLINE. RETRYING...");
+        loader.style.display = 'none';
         generateBtn.disabled = false;
     }
+}
 
-        async function saturate() {
-            loader.style.display = 'flex';
-            saturateBtn.disabled = true;
-            try {
-                const b64 = canvas.toDataURL('image/png').split(',')[1];
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
-                
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [
-                                { text: "Apply high-end professional tattoo pigments. COLOR INSTRUCTIONS: Fill the line art with deep, saturated tattoo inks. Use realistic skin-safe pigments like Crimson, Ochre, and Cobalt. SHADING: Use whip-shading and color packing to create depth and volume. CONSTRAINT: Keep the background perfectly white (#FFFFFF). Only color the interior of the tattoo design. Ensure it looks like a high-quality tattoo on a white stencil sheet." }, 
-                                { inlineData: { mimeType: "image/png", data: b64 } }
-                            ] 
-                        }],
-                        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-                    })
-                });
-                
-                const res = await response.json();
-                const colorData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                
-                if(colorData) {
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-                        ctx.drawImage(img, 0, 0, 1024, 1024);
-                        loader.style.display = 'none';
-                        saturateBtn.style.display = 'none'; 
-                        saturateBtn.disabled = false;
-                    };
-                    img.src = `data:image/png;base64,${colorData}`;
-                } else { throw new Error("No pigment returned"); }
-            } catch(e) { 
-                console.error(e);
-                showMessage("PIGMENT ENGINE FAILED. RETRYING...");
-                loader.style.display = 'none'; 
-                saturateBtn.disabled = false;
-            }
+// 2. UPDATE THE SATURATE (STENCIL) FUNCTION
+async function saturate() {
+    const saturateBtn = document.getElementById('saturateBtn');
+    const loader = document.getElementById('loader');
+
+    try {
+        saturateBtn.disabled = true;
+        loader.style.display = 'flex';
+
+        const imageData = canvas.toDataURL('image/png').split(',')[1];
+
+        // CALLING YOUR SECURE BRIDGE
+        const response = await fetch('PASTE_YOUR_RUN_APP_URL_HERE', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saturate', image: imageData })
+        });
+
+        const data = await response.json();
+        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (textResponse) {
+            const base64Match = textResponse.match(/data:image\/png;base64,([A-Za-z0-9+/=]+)/) || 
+                               textResponse.match(/([A-Za-z0-9+/=]{100,})/);
+            const finalBase64 = base64Match ? base64Match[1] : null;
+
+            if (finalBase64) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    loader.style.display = 'none';
+                    saturateBtn.disabled = false;
+                };
+                img.src = `data:image/png;base64,${finalBase64}`;
+            } else { throw new Error("Processing failed"); }
         }
+    } catch (e) {
+        console.error(e);
+        showMessage("PIGMENT ENGINE FAILED. RETRYING...");
+        loader.style.display = 'none';
+        saturateBtn.disabled = false;
+    }
+}
 
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
@@ -701,41 +666,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
