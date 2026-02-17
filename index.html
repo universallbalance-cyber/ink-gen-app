@@ -624,6 +624,7 @@ async function saturate() {
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     loader.style.display = 'none';
                     saturateBtn.disabled = false;
+					saturateBtn.style.display = 'flex';
                 };
                 img.src = `data:image/png;base64,${finalBase64}`;
             } else { throw new Error("Processing failed"); }
@@ -666,5 +667,6 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
