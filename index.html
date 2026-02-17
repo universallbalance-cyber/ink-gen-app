@@ -550,7 +550,7 @@
 
   // 1. UPDATE THE GENERATE FUNCTION
 async function generate() {
-    const prompt = document.getElementById('prompt').value;
+    const prompt = document.getElementById('promptInput').value;
     if (!prompt) return showMessage("ENTER A DESIGN CONCEPT");
 
     const generateBtn = document.getElementById('generateBtn');
@@ -666,4 +666,5 @@ async function saturate() {
 </body>
 
 </html>
+
 
