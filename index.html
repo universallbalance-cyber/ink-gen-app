@@ -438,13 +438,28 @@
             { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
         ];
 
-        function init() {
-            canvas.width = 1024; canvas.height = 1024;
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-            ctx.font = "bold 30px Orbitron"; ctx.fillStyle = "#333"; ctx.textAlign = "center";
-            ctx.fillText("ENGINE READY", 512, 512);
+function init() {
+    // 1. Setup Canvas (This must happen)
+    canvas.width = 1024; 
+    canvas.height = 1024;
+    ctx.fillStyle = "white"; 
+    ctx.fillRect(0,0,1024,1024);
+    ctx.font = "bold 30px Orbitron"; 
+    ctx.fillStyle = "#333"; 
+    ctx.textAlign = "center";
+    ctx.fillText("ENGINE READY", 512, 512);
+
+    // 2. Load Audio (This is causing the 404 crash)
+    // We wrap this in a try/catch so if it fails, the app keeps running
+    try {
+        if (playlist && playlist.length > 0) {
             player.src = playlist[0].url;
+            player.load(); 
         }
+    } catch (audioError) {
+        console.warn("Audio failed to load, but session starting anyway.");
+    }
+}
 
         const showMessage = (text) => {
             notification.textContent = text;
@@ -677,6 +692,7 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
 
