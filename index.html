@@ -573,14 +573,15 @@ async function generate() {
         if (data.predictions && data.predictions[0].bytesBase64Encoded) {
             const base64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
-            img.onload = () => {
+			img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
-				// ADD THESE TWO LINES:
-                const satBtn = document.getElementById('saturateBtn');
-                if(satBtn) satBtn.style.display = 'block';
+                // This is the clean way to show the button without crashing
+                if (document.getElementById('saturateBtn')) {
+                    document.getElementById('saturateBtn').style.display = 'flex';
+                }
             };
             img.src = `data:image/png;base64,${base64Data}`;
             };
@@ -672,6 +673,7 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
 
