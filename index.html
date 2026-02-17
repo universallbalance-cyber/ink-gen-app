@@ -2,11 +2,6 @@
 <html lang="en">
 <head>
     <meta name="referrer" content="no-referrer-when-downgrade">
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>INK-GEN PRO | Professional Tattoo Studio</title>
@@ -133,13 +128,6 @@
             transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        body.focus-mode #artFrame {
-            width: 100vw;
-            height: 100dvh;
-            border-radius: 0;
-            z-index: 100;
-        }
-
         .skin-overlay {
             position: absolute;
             inset: 0;
@@ -179,7 +167,7 @@
             transition: 0.2s;
         }
 
-		.saturate-btn {
+        .saturate-btn {
             background: #f59e0b;
             color: black;
             font-size: 9px;
@@ -246,21 +234,6 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #exitFocus {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: white;
-            color: black;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 9px;
-            font-weight: 900;
-            display: none;
-            z-index: 110;
-        }
-        body.focus-mode #exitFocus { display: block; }
-
         #notification {
             position: fixed;
             bottom: 2rem;
@@ -278,6 +251,16 @@
             display: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
+
+        .footer-link {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .footer-link:hover { color: var(--stencil-blue); }
     </style>
 </head>
 <body>
@@ -286,12 +269,12 @@
 
     <!-- HOME PAGE -->
     <div id="homePage">
-		<button id="helpBtn" style="position: fixed; bottom: 150px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
+        <button id="helpBtn" style="position: fixed; bottom: 150px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
 
         <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
             <div style="width: 85%; max-width: 400px; padding: 30px; border: 1px solid rgba(56, 189, 248, 0.2); background: #050505; border-radius: 4px; font-family: 'Outfit', sans-serif; color: white; text-align: left;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #38bdf8; letter-spacing: 2px; margin-bottom: 20px; font-size: 18px;">OPERATIONS MANUAL</h2>
-                <div style="font-size: 13px; line-height: 2; opacity: 0.7; text-transform: uppercase; tracking: 0.1em;">
+                <div style="font-size: 13px; line-height: 2; opacity: 0.7; text-transform: uppercase;">
                     <p>1. SET BASE CANVAS TONE</p>
                     <p>2. ENTER DESIGN STUDIO</p>
                     <p>3. INPUT CONCEPT PROMPT</p>
@@ -320,16 +303,14 @@
             <button id="enterStudio" class="gen-btn">Start Session</button>
         </div>
 
-        <div class="mt-12 opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
-		<div style="padding: 20px; text-align: center; margin-top: 20px;">
-	        <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color: #475569; text-decoration: underline; font-size: 10px; text-transform: uppercase;">Privacy Policy</a>
-	    </div>
+        <div class="mt-12 flex flex-col items-center gap-4">
+            <div class="opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
+            <a href="https://universallbalance-cyber.github.io/privacy-policy" target="_blank" class="footer-link">Privacy Policy</a>
+        </div>
     </div>	
 
     <!-- STUDIO PAGE -->
     <div id="studioPage">
-        <button id="exitFocus" class="header-font">EXIT VIEW</button>
-
         <header class="studio-header">
             <button id="goHome" class="p-1 opacity-30">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
@@ -352,9 +333,7 @@
 
             <div class="flex gap-1">
                 <button id="skinTog" class="style-btn">Skin Preview</button>
-                <button id="dlBtn" class="style-btn !bg-white/10 !border-none">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                </button>
+                <button id="dlBtn" class="style-btn !bg-white/10 !border-none">SAVE</button>
             </div>
         </header>
 
@@ -370,7 +349,7 @@
         </div>
 
         <footer class="studio-footer">
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3" id="styleSelector">
                 <button class="style-btn active" data-style="fineline">Fine Line</button>
                 <button class="style-btn" data-style="singlism">Singlism</button>
                 <button class="style-btn" data-style="blackwork">Blackwork</button>
@@ -386,7 +365,7 @@
             </div>
 
             <div class="flex flex-col gap-2">
-                <input type="text" id="promptInput" placeholder="DESCRIBE THE FUTURE TATTOO" class="compact-input">
+                <input type="text" id="promptInput" placeholder="DESCRIBE THE DESIGN" class="compact-input">
                 <div class="flex gap-2">
                     <button id="saturateBtn" class="saturate-btn">COLOR</button>
                     <button id="generateBtn" class="gen-btn">Generate Ink</button>
@@ -424,17 +403,19 @@
         }
 
         function findBase64(obj) {
-            if (!obj || typeof obj !== 'object') return null;
-            const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text', 'content', 'b64_json', 'imageUrl'];
+            if (!obj) return null;
+            if (typeof obj === 'string' && obj.length > 100) return obj;
+            const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'content', 'b64_json'];
             for (const key of keys) {
-                if (typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
+                if (obj[key] && typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
             }
-            if (Array.isArray(obj) && obj.length > 0) {
-                const foundInArr = findBase64(obj[0]);
-                if (foundInArr) return foundInArr;
-            }
-            for (const key in obj) {
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
+            if (Array.isArray(obj)) {
+                for (let item of obj) {
+                    const found = findBase64(item);
+                    if (found) return found;
+                }
+            } else if (typeof obj === 'object') {
+                for (let key in obj) {
                     const found = findBase64(obj[key]);
                     if (found) return found;
                 }
@@ -443,56 +424,80 @@
         }
 
         function cleanBase64(str) {
-            if (!str) return "";
-            return str.trim()
-                .replace(/^```[a-z]*\s*/i, "")
-                .replace(/\s*```$/i, "")
-                .replace(/[\s\n\r]/g, "")
-                .replace(/^data:image\/[a-z]+;base64,/, "");
+            return str.replace(/^data:image\/[a-z]+;base64,/, "").replace(/[\s\n\r]/g, "");
         }
 
-        function init() {
-            canvas.width = 1024; canvas.height = 1024;
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
-            player.src = playlist[0].url;
+        async function apiRequest(payload) {
+            const endpoint = 'https://ink-gen-api-365969989524.us-central1.run.app';
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`Server Status: ${response.status}`);
+            const text = await response.text();
+            try { return JSON.parse(text); } catch (e) {
+                if (text.length > 500) return { data: text };
+                throw new Error("Invalid Response Format");
+            }
         }
 
-        document.getElementById('enterStudio').onclick = () => {
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('studioPage').style.display = 'flex';
-            init();
-        };
+        async function generate() {
+            if (!promptInput.value) return showMessage("ENTER A CONCEPT");
+            try {
+                generateBtn.disabled = true;
+                loader.style.display = 'flex';
+                const result = await apiRequest({ 
+                    action: 'generate', 
+                    prompt: `${selectedStyle} tattoo ${promptInput.value} isolated on white background` 
+                });
+                const raw = findBase64(result);
+                if (!raw) throw new Error("No image data found");
+                const img = new Image();
+                img.onload = () => {
+                    ctx.fillStyle = "white"; ctx.fillRect(0, 0, 1024, 1024);
+                    ctx.drawImage(img, 0, 0, 1024, 1024);
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                    saturateBtn.style.display = 'flex';
+                };
+                img.src = `data:image/png;base64,${cleanBase64(raw)}`;
+            } catch (e) {
+                loader.style.display = 'none'; generateBtn.disabled = false;
+                showMessage(e.message || "ENGINE ERROR");
+            }
+        }
 
-        document.getElementById('goHome').onclick = () => {
-            document.getElementById('homePage').style.display = 'flex';
-            document.getElementById('studioPage').style.display = 'none';
-        };
+        async function saturate() {
+            try {
+                saturateBtn.disabled = true; loader.style.display = 'flex';
+                const currentImg = canvas.toDataURL('image/png').split(',')[1];
+                const result = await apiRequest({ action: 'saturate', image: currentImg });
+                const raw = findBase64(result);
+                if (!raw) throw new Error("No color data found");
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, 1024, 1024);
+                    loader.style.display = 'none'; saturateBtn.disabled = false;
+                };
+                img.src = `data:image/png;base64,${cleanBase64(raw)}`;
+            } catch (e) {
+                loader.style.display = 'none'; saturateBtn.disabled = false;
+                showMessage("COLOR ERROR");
+            }
+        }
 
-        document.querySelectorAll('.skin-swatch').forEach(sw => {
-            sw.onclick = () => {
-                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
-                sw.classList.add('active');
-                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
-            };
-        });
-
-        document.getElementById('skinTog').onclick = function() {
-            const active = artFrame.classList.toggle('preview-active');
-            this.classList.toggle('active', active);
-        };
-
+        // --- MUSIC LOGIC ---
         document.getElementById('musicMenu').onclick = (e) => {
             e.stopPropagation();
             document.getElementById('musicPop').classList.toggle('show');
         };
-
         document.getElementById('playBtn').onclick = async () => {
             if(!isPlaying) {
                 try { await player.play(); isPlaying = true; document.getElementById('p-ico').innerText = '||'; } 
                 catch(e) { console.error("Audio blocked"); }
             } else { player.pause(); isPlaying = false; document.getElementById('p-ico').innerText = '▶'; }
         };
-
         document.querySelectorAll('.track-item').forEach(item => {
             item.onclick = () => {
                 const idx = item.dataset.idx;
@@ -501,105 +506,50 @@
                 document.querySelectorAll('.track-item').forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
                 if(isPlaying) player.play();
+                document.getElementById('musicPop').classList.remove('show');
             };
         });
 
-        document.querySelectorAll('.style-btn[data-style]').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.style-btn[data-style]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedStyle = btn.dataset.style;
-            };
-        });
-
-        async function generate() {
-            if (!promptInput.value) return showMessage("ENTER A DESIGN CONCEPT");
-            try {
-                generateBtn.disabled = true;
-                loader.style.display = 'flex';
-                const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    mode: 'cors', // Explicitly enable CORS
-                    credentials: 'omit', // Prevent sending cookies which can trigger CORS blocks
-                    body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " tattoo " + promptInput.value + " on white background" })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const rawB64 = findBase64(data);
-                if (rawB64) {
-                    const b64 = cleanBase64(rawB64);
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.fillStyle = "white";
-                        ctx.fillRect(0, 0, 1024, 1024);
-                        ctx.drawImage(img, 0, 0, 1024, 1024);
-                        loader.style.display = 'none';
-                        generateBtn.disabled = false;
-                        saturateBtn.style.display = 'flex';
-                    };
-                    img.src = `data:image/png;base64,${b64}`;
-                } else throw new Error("No image data found in response");
-            } catch (e) {
-                console.error("Critical Engine Error:", e);
-                loader.style.display = 'none';
-                generateBtn.disabled = false;
-                showMessage("ENGINE OFFLINE: CHECK CONSOLE");
-            }
-        }
-
-        async function saturate() {
-            try {
-                saturateBtn.disabled = true;
-                loader.style.display = 'flex';
-                const currentImg = canvas.toDataURL('image/png').split(',')[1];
-                const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    mode: 'cors',
-                    credentials: 'omit',
-                    body: JSON.stringify({ action: 'saturate', image: currentImg })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const rawB64 = findBase64(data);
-                if (rawB64) {
-                    const b64 = cleanBase64(rawB64);
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.drawImage(img, 0, 0, 1024, 1024);
-                        loader.style.display = 'none';
-                        saturateBtn.disabled = false;
-                    };
-                    img.src = `data:image/png;base64,${b64}`;
-                } else throw new Error("No color data found in response");
-            } catch (e) {
-                console.error("Critical Saturate Error:", e);
-                loader.style.display = 'none';
-                saturateBtn.disabled = false;
-                showMessage("COLOR ENGINE OFFLINE");
-            }
-        }
-
-        generateBtn.onclick = generate;
-        saturateBtn.onclick = saturate;
-        document.getElementById('dlBtn').onclick = () => {
-            const link = document.createElement('a');
-            link.download = `ink-${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
-        };
-
+        // --- HELP LOGIC ---
         const helpBtn = document.getElementById('helpBtn');
         const helpModal = document.getElementById('helpModal');
         helpBtn.onclick = () => helpModal.style.display = 'flex';
         document.getElementById('closeHelp').onclick = () => helpModal.style.display = 'none';
+
+        // --- APP INITIALIZATION ---
+        canvas.width = 1024; canvas.height = 1024;
+        ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
+        player.src = playlist[0].url;
+
+        document.getElementById('enterStudio').onclick = () => {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('studioPage').style.display = 'flex';
+        };
+        document.getElementById('goHome').onclick = () => location.reload();
+        document.querySelectorAll('.skin-swatch').forEach(sw => {
+            sw.onclick = () => {
+                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+            };
+        });
+        document.getElementById('skinTog').onclick = () => artFrame.classList.toggle('preview-active');
+        document.getElementById('generateBtn').onclick = generate;
+        document.getElementById('saturateBtn').onclick = saturate;
+        document.querySelectorAll('#styleSelector button').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('#styleSelector button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedStyle = btn.dataset.style;
+            };
+        });
+        document.getElementById('dlBtn').onclick = () => {
+            const link = document.createElement('a');
+            link.download = 'tattoo-design.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        };
+        window.onclick = () => document.getElementById('musicPop').classList.remove('show');
     </script>
 </body>
 </html>
