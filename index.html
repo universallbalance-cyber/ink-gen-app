@@ -625,8 +625,10 @@ async function saturate() {
         saturateBtn.disabled = true;
         loader.style.display = 'flex';
 
+        // 1. Grab current canvas image
         const imageData = canvas.toDataURL('image/png').split(',')[1];
 
+        // 2. Send to Bridge
         const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -635,17 +637,19 @@ async function saturate() {
 
         const data = await response.json();
         
-        // FIX: Look into 'candidates' OR 'predictions' depending on the model response
-        let textResponse = "";
-        if (data.candidates && data.candidates[0]) {
-            textResponse = data.candidates[0].content.parts[0].text;
-        } else if (data.predictions && data.predictions[0]) {
-            textResponse = data.predictions[0].text || data.predictions[0].bytesBase64Encoded;
+        // 3. SECURE DATA PATH (This fixes the 'reading 0' error)
+        let rawContent = "";
+        if (data.predictions && data.predictions[0]) {
+            // If it comes from the prediction engine
+            rawContent = data.predictions[0].bytesBase64Encoded || data.predictions[0].text;
+        } else if (data.candidates && data.candidates[0]) {
+            // If it comes from the chat engine
+            rawContent = data.candidates[0].content.parts[0].text;
         }
 
-        if (textResponse) {
-            // Clean the base64 string of any markdown or headers
-            const cleanBase64 = textResponse.replace(/^data:image\/png;base64,/, "").replace(/[\s\n\r]/g, "");
+        if (rawContent) {
+            // Clean up the data (remove any "data:image/png..." prefix if AI added it)
+            const cleanBase64 = rawContent.replace(/^data:image\/[a-z]+;base64,/, "").replace(/[\s\n\r]/g, "");
             
             const img = new Image();
             img.onload = () => {
@@ -656,7 +660,7 @@ async function saturate() {
             };
             img.src = `data:image/png;base64,${cleanBase64}`;
         } else {
-            throw new Error("No image data in response");
+            throw new Error("Invalid response format from bridge");
         }
     } catch (e) {
         console.error("Color Fetch Error:", e);
@@ -696,6 +700,7 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
 
