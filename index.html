@@ -561,7 +561,7 @@ async function generate() {
         loader.style.display = 'flex';
 
         // CALLING YOUR SECURE BRIDGE
-        const response = await fetch('PASTE_YOUR_RUN_APP_URL_HERE', {
+        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'generate', prompt: prompt })
@@ -603,7 +603,7 @@ async function saturate() {
         const imageData = canvas.toDataURL('image/png').split(',')[1];
 
         // CALLING YOUR SECURE BRIDGE
-        const response = await fetch('PASTE_YOUR_RUN_APP_URL_HERE', {
+        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'saturate', image: imageData })
@@ -666,3 +666,4 @@ async function saturate() {
 </body>
 
 </html>
+
