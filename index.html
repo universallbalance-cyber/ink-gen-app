@@ -42,6 +42,7 @@
 
         .header-font { font-family: 'Orbitron', sans-serif; }
 
+        /* SCROLLABLE HOME */
         #homePage { 
             display: flex; 
             flex-direction: column;
@@ -63,6 +64,7 @@
             text-align: center;
         }
 
+        /* STUDIO PAGE */
         #studioPage { 
             display: none; 
             flex-direction: column;
@@ -108,6 +110,7 @@
             border-color: var(--stencil-blue);
         }
 
+        /* CANVAS AREA */
         .canvas-container {
             flex: 1;
             display: flex;
@@ -176,7 +179,7 @@
             transition: 0.2s;
         }
 
-        .saturate-btn {
+		.saturate-btn {
             background: #f59e0b;
             color: black;
             font-size: 9px;
@@ -189,6 +192,40 @@
             align-items: center;
             justify-content: center;
         }
+
+        .music-pop {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 140px;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-5px);
+            transition: 0.2s;
+            z-index: 100;
+        }
+        .music-pop.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .track-item { 
+            padding: 0.6rem 0.8rem; 
+            font-size: 9px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: #475569;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .track-item.active { color: var(--stencil-blue); }
+
+        .skin-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .skin-swatch.active { border-color: var(--stencil-blue); scale: 1.1; }
 
         #loader {
             position: absolute;
@@ -209,6 +246,21 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        #exitFocus {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            color: black;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 900;
+            display: none;
+            z-index: 110;
+        }
+        body.focus-mode #exitFocus { display: block; }
+
         #notification {
             position: fixed;
             bottom: 2rem;
@@ -221,8 +273,10 @@
             font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.1em;
             z-index: 200;
             display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -230,7 +284,25 @@
 
     <div id="notification"></div>
 
+    <!-- HOME PAGE -->
     <div id="homePage">
+		<button id="helpBtn" style="position: fixed; bottom: 150px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
+
+        <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+            <div style="width: 85%; max-width: 400px; padding: 30px; border: 1px solid rgba(56, 189, 248, 0.2); background: #050505; border-radius: 4px; font-family: 'Outfit', sans-serif; color: white; text-align: left;">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #38bdf8; letter-spacing: 2px; margin-bottom: 20px; font-size: 18px;">OPERATIONS MANUAL</h2>
+                <div style="font-size: 13px; line-height: 2; opacity: 0.7; text-transform: uppercase; tracking: 0.1em;">
+                    <p>1. SET BASE CANVAS TONE</p>
+                    <p>2. ENTER DESIGN STUDIO</p>
+                    <p>3. INPUT CONCEPT PROMPT</p>
+                    <p>4. SELECT STYLE ARCHIVE</p>
+                    <p>5. ENGAGE ENGINE (GENERATE)</p>
+                    <p>6. SATURATE PIGMENT IF NEEDED</p>
+                </div>
+                <button id="closeHelp" style="margin-top: 30px; width: 100%; padding: 12px; background: #38bdf8; color: black; border: none; font-family: 'Orbitron', sans-serif; font-weight: 900; cursor: pointer; font-size: 12px;">CLOSE MANUAL</button>
+            </div>
+        </div>
+
         <div class="mt-12 mb-8 text-center">
             <h1 class="header-font text-4xl font-black italic tracking-tighter mb-1">INK-GEN <span class="text-sky-400">PRO</span></h1>
             <p class="text-[8px] tracking-[0.4em] opacity-30 font-bold uppercase">Tattoo Image Generating Engine</p>
@@ -239,24 +311,50 @@
         <div class="home-card shadow-2xl">
             <h2 class="header-font text-[9px] tracking-[0.2em] opacity-50 uppercase mb-6">Select Base Canvas</h2>
             <div class="flex justify-between mb-8">
-                <div class="skin-swatch active w-8 h-8 rounded-full border-2 border-transparent" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
-                <div class="skin-swatch w-8 h-8 rounded-full border-2 border-transparent" style="background: #e5c298;" data-color="#e5c298"></div>
-                <div class="skin-swatch w-8 h-8 rounded-full border-2 border-transparent" style="background: #c69061;" data-color="#c69061"></div>
-                <div class="skin-swatch w-8 h-8 rounded-full border-2 border-transparent" style="background: #8d5524;" data-color="#8d5524"></div>
-                <div class="skin-swatch w-8 h-8 rounded-full border-2 border-transparent" style="background: #3c2005;" data-color="#3c2005"></div>
+                <div class="skin-swatch active" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
+                <div class="skin-swatch" style="background: #e5c298;" data-color="#e5c298"></div>
+                <div class="skin-swatch" style="background: #c69061;" data-color="#c69061"></div>
+                <div class="skin-swatch" style="background: #8d5524;" data-color="#8d5524"></div>
+                <div class="skin-swatch" style="background: #3c2005;" data-color="#3c2005"></div>
             </div>
             <button id="enterStudio" class="gen-btn">Start Session</button>
         </div>
+
+        <div class="mt-12 opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
+		<div style="padding: 20px; text-align: center; margin-top: 20px;">
+	        <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color: #475569; text-decoration: underline; font-size: 10px; text-transform: uppercase;">Privacy Policy</a>
+	    </div>
     </div>	
 
+    <!-- STUDIO PAGE -->
     <div id="studioPage">
+        <button id="exitFocus" class="header-font">EXIT VIEW</button>
+
         <header class="studio-header">
             <button id="goHome" class="p-1 opacity-30">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
             </button>
+
+            <div class="flex items-center gap-1 relative">
+                <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
+                    <span id="p-ico">▶</span>
+                </button>
+                <button id="musicMenu" class="style-btn !rounded-l-none min-w-[70px] text-left flex justify-between items-center gap-2">
+                    <span id="trackName">Track I</span>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="musicPop" class="music-pop">
+                    <div class="track-item active" data-idx="0">Spiritual I</div>
+                    <div class="track-item" data-idx="1">Spiritual II</div>
+                    <div class="track-item" data-idx="2">Spiritual III</div>
+                </div>
+            </div>
+
             <div class="flex gap-1">
                 <button id="skinTog" class="style-btn">Skin Preview</button>
-                <button id="dlBtn" class="style-btn !bg-white/10">SAVE</button>
+                <button id="dlBtn" class="style-btn !bg-white/10 !border-none">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                </button>
             </div>
         </header>
 
@@ -266,7 +364,7 @@
                 <canvas id="tattooCanvas"></canvas>
                 <div id="loader">
                     <div class="ring"></div>
-                    <div class="mt-3 header-font text-[7px] tracking-widest text-sky-400">PROCESSING INK</div>
+                    <div class="mt-3 header-font text-[7px] tracking-widest text-sky-400 animate-pulse">PROCESSING INK</div>
                 </div>
             </div>
         </div>
@@ -274,12 +372,21 @@
         <footer class="studio-footer">
             <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3">
                 <button class="style-btn active" data-style="fineline">Fine Line</button>
+                <button class="style-btn" data-style="singlism">Singlism</button>
                 <button class="style-btn" data-style="blackwork">Blackwork</button>
+                <button class="style-btn" data-style="tribal">Tribal</button>
+                <button class="style-btn" data-style="izumi">Izumi</button>
+                <button class="style-btn" data-style="skulls">Skulls</button>
+                <button class="style-btn" data-style="neo">Neo-Trad</button>
+                <button class="style-btn" data-style="disney">Disney</button>
                 <button class="style-btn" data-style="japanese">Japanese</button>
                 <button class="style-btn" data-style="cyber">Cyber</button>
+                <button class="style-btn" data-style="traditional">Trad</button>
+                <button class="style-btn" data-style="micro">Micro</button>
             </div>
+
             <div class="flex flex-col gap-2">
-                <input type="text" id="promptInput" placeholder="DESCRIBE DESIGN" class="compact-input">
+                <input type="text" id="promptInput" placeholder="DESCRIBE THE FUTURE TATTOO" class="compact-input">
                 <div class="flex gap-2">
                     <button id="saturateBtn" class="saturate-btn">COLOR</button>
                     <button id="generateBtn" class="gen-btn">Generate Ink</button>
@@ -288,16 +395,27 @@
         </footer>
     </div> 
 
+    <audio id="player" loop></audio>
+
     <script type="module">
         const canvas = document.getElementById('tattooCanvas');
         const ctx = canvas.getContext('2d');
+        const artFrame = document.getElementById('artFrame');
+        const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
         const saturateBtn = document.getElementById('saturateBtn');
         const loader = document.getElementById('loader');
+        const player = document.getElementById('player');
         const notification = document.getElementById('notification');
-        const promptInput = document.getElementById('promptInput');
 
         let selectedStyle = 'fineline';
+        let isPlaying = false;
+        
+        const playlist = [
+            { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
+            { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
+            { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
+        ];
 
         function showMessage(text) {
             notification.textContent = text;
@@ -305,17 +423,73 @@
             setTimeout(() => { notification.style.display = 'none'; }, 5000);
         }
 
+        // --- RESILIENT DATA PARSER ---
+        function findBase64(obj) {
+            if (!obj || typeof obj !== 'object') return null;
+            const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text', 'content'];
+            for (const key of keys) {
+                if (typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
+            }
+            if (Array.isArray(obj) && obj.length > 0) return findBase64(obj[0]);
+            for (const key in obj) {
+                const found = findBase64(obj[key]);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function init() {
+            canvas.width = 1024; canvas.height = 1024;
+            ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
+            player.src = playlist[0].url;
+        }
+
         document.getElementById('enterStudio').onclick = () => {
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('studioPage').style.display = 'flex';
-            canvas.width = 1024; canvas.height = 1024;
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,1024,1024);
+            init();
         };
 
         document.getElementById('goHome').onclick = () => {
             document.getElementById('homePage').style.display = 'flex';
             document.getElementById('studioPage').style.display = 'none';
         };
+
+        document.querySelectorAll('.skin-swatch').forEach(sw => {
+            sw.onclick = () => {
+                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+            };
+        });
+
+        document.getElementById('skinTog').onclick = function() {
+            const active = artFrame.classList.toggle('preview-active');
+            this.classList.toggle('active', active);
+        };
+
+        document.getElementById('musicMenu').onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('musicPop').classList.toggle('show');
+        };
+
+        document.getElementById('playBtn').onclick = async () => {
+            if(!isPlaying) {
+                try { await player.play(); isPlaying = true; document.getElementById('p-ico').innerText = '||'; } 
+                catch(e) { console.error("Audio blocked"); }
+            } else { player.pause(); isPlaying = false; document.getElementById('p-ico').innerText = '▶'; }
+        };
+
+        document.querySelectorAll('.track-item').forEach(item => {
+            item.onclick = () => {
+                const idx = item.dataset.idx;
+                player.src = playlist[idx].url;
+                document.getElementById('trackName').innerText = playlist[idx].name;
+                document.querySelectorAll('.track-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if(isPlaying) player.play();
+            };
+        });
 
         document.querySelectorAll('.style-btn[data-style]').forEach(btn => {
             btn.onclick = () => {
@@ -325,45 +499,18 @@
             };
         });
 
-        // --- THE CRITICAL FIX ---
-        // This function searches deeply through the JSON response for anything that looks like base64
-        function findBase64(obj) {
-            if (!obj || typeof obj !== 'object') return null;
-            
-            // Priority keys for image data
-            const priorityKeys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text'];
-            for (const key of priorityKeys) {
-                if (typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
-            }
-
-            // If it's an array, search the first element (handling [0] safely)
-            if (Array.isArray(obj) && obj.length > 0) {
-                return findBase64(obj[0]);
-            }
-
-            // Recursive search for nested structures (like .predictions[0] or .candidates[0])
-            for (const key in obj) {
-                const found = findBase64(obj[key]);
-                if (found) return found;
-            }
-            return null;
-        }
-
         async function generate() {
-            if (!promptInput.value) return showMessage("ENTER PROMPT");
+            if (!promptInput.value) return showMessage("ENTER A DESIGN CONCEPT");
             try {
                 generateBtn.disabled = true;
                 loader.style.display = 'flex';
-                
                 const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " " + promptInput.value })
+                    body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " tattoo " + promptInput.value + " on white background" })
                 });
-
                 const data = await response.json();
                 const b64 = findBase64(data);
-
                 if (b64) {
                     const img = new Image();
                     img.onload = () => {
@@ -373,12 +520,11 @@
                         saturateBtn.style.display = 'flex';
                     };
                     img.src = `data:image/png;base64,${b64.replace(/[\s\n\r]/g, "")}`;
-                } else { throw new Error("No image data found"); }
+                } else throw new Error("No image data");
             } catch (e) {
-                console.error(e);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
-                showMessage("ENGINE OFFLINE");
+                showMessage("STENCIL ENGINE OFFLINE");
             }
         }
 
@@ -387,16 +533,13 @@
                 saturateBtn.disabled = true;
                 loader.style.display = 'flex';
                 const currentImg = canvas.toDataURL('image/png').split(',')[1];
-
                 const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'saturate', image: currentImg })
                 });
-
                 const data = await response.json();
                 const b64 = findBase64(data);
-
                 if (b64) {
                     const img = new Image();
                     img.onload = () => {
@@ -405,12 +548,11 @@
                         saturateBtn.disabled = false;
                     };
                     img.src = `data:image/png;base64,${b64.replace(/[\s\n\r]/g, "").replace(/^data:image\/[a-z]+;base64,/, "")}`;
-                } else { throw new Error("No color data found"); }
+                } else throw new Error("No color data");
             } catch (e) {
-                console.error("Saturate Error:", e);
                 loader.style.display = 'none';
                 saturateBtn.disabled = false;
-                showMessage("COLOR FAILED");
+                showMessage("COLOR ENGINE OFFLINE");
             }
         }
 
@@ -418,8 +560,13 @@
         saturateBtn.onclick = saturate;
         document.getElementById('dlBtn').onclick = () => {
             const link = document.createElement('a');
-            link.download = 'ink.png'; link.href = canvas.toDataURL(); link.click();
+            link.download = `ink-${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
         };
+
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        helpBtn.onclick = () => helpModal.style.display = 'flex';
+        document.getElementById('closeHelp').onclick = () => helpModal.style.display = 'none';
     </script>
 </body>
 </html>
