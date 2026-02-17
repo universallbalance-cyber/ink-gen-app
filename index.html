@@ -423,19 +423,40 @@
             setTimeout(() => { notification.style.display = 'none'; }, 5000);
         }
 
-        // --- RESILIENT DATA PARSER ---
+        // --- ENHANCED RESILIENT DATA PARSER ---
         function findBase64(obj) {
             if (!obj || typeof obj !== 'object') return null;
-            const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text', 'content'];
+            
+            // 1. Direct key search in current object level
+            const keys = ['bytesBase64Encoded', 'image', 'data', 'base64', 'text', 'content', 'b64_json', 'imageUrl'];
             for (const key of keys) {
                 if (typeof obj[key] === 'string' && obj[key].length > 100) return obj[key];
             }
-            if (Array.isArray(obj) && obj.length > 0) return findBase64(obj[0]);
+            
+            // 2. If it's an array, look inside the first item
+            if (Array.isArray(obj) && obj.length > 0) {
+                const foundInArr = findBase64(obj[0]);
+                if (foundInArr) return foundInArr;
+            }
+            
+            // 3. Recursive deep search for any string that looks like base64
             for (const key in obj) {
-                const found = findBase64(obj[key]);
-                if (found) return found;
+                if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    const found = findBase64(obj[key]);
+                    if (found) return found;
+                }
             }
             return null;
+        }
+
+        function cleanBase64(str) {
+            if (!str) return "";
+            // Remove markdown formatting, newlines, and data-uri headers
+            return str.trim()
+                .replace(/^```[a-z]*\s*/i, "") // remove opening markdown code block
+                .replace(/\s*```$/i, "")        // remove closing markdown code block
+                .replace(/[\s\n\r]/g, "")       // remove all whitespaces/newlines
+                .replace(/^data:image\/[a-z]+;base64,/, ""); // remove data uri prefix
         }
 
         function init() {
@@ -510,18 +531,22 @@
                     body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " tattoo " + promptInput.value + " on white background" })
                 });
                 const data = await response.json();
-                const b64 = findBase64(data);
-                if (b64) {
+                const rawB64 = findBase64(data);
+                if (rawB64) {
+                    const b64 = cleanBase64(rawB64);
                     const img = new Image();
                     img.onload = () => {
+                        ctx.fillStyle = "white";
+                        ctx.fillRect(0, 0, 1024, 1024);
                         ctx.drawImage(img, 0, 0, 1024, 1024);
                         loader.style.display = 'none';
                         generateBtn.disabled = false;
                         saturateBtn.style.display = 'flex';
                     };
-                    img.src = `data:image/png;base64,${b64.replace(/[\s\n\r]/g, "")}`;
-                } else throw new Error("No image data");
+                    img.src = `data:image/png;base64,${b64}`;
+                } else throw new Error("No image data found in response");
             } catch (e) {
+                console.error("Gen Error:", e);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
                 showMessage("STENCIL ENGINE OFFLINE");
@@ -539,17 +564,19 @@
                     body: JSON.stringify({ action: 'saturate', image: currentImg })
                 });
                 const data = await response.json();
-                const b64 = findBase64(data);
-                if (b64) {
+                const rawB64 = findBase64(data);
+                if (rawB64) {
+                    const b64 = cleanBase64(rawB64);
                     const img = new Image();
                     img.onload = () => {
                         ctx.drawImage(img, 0, 0, 1024, 1024);
                         loader.style.display = 'none';
                         saturateBtn.disabled = false;
                     };
-                    img.src = `data:image/png;base64,${b64.replace(/[\s\n\r]/g, "").replace(/^data:image\/[a-z]+;base64,/, "")}`;
-                } else throw new Error("No color data");
+                    img.src = `data:image/png;base64,${b64}`;
+                } else throw new Error("No color data found in response");
             } catch (e) {
+                console.error("Saturate Error:", e);
                 loader.style.display = 'none';
                 saturateBtn.disabled = false;
                 showMessage("COLOR ENGINE OFFLINE");
