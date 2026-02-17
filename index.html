@@ -312,7 +312,11 @@
             </div>
             <button id="enterStudio" class="gen-btn">Start Session</button>
         </div>
-        <div class="mt-12 opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
+        
+        <div class="mt-12 flex flex-col items-center gap-2">
+            <div class="opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
+            <a href="https://www.termsfeed.com/live/74e12e09-6685-484d-88b9-43c220f18858" target="_blank" class="text-[7px] text-sky-400/50 uppercase tracking-widest font-bold hover:text-sky-400 transition-colors">Privacy Policy</a>
+        </div>
     </div>	
 
     <div id="studioPage">
@@ -380,7 +384,7 @@
     <audio id="player" loop></audio>
 
     <script type="module">
-        const apiKey = ""; // API key is managed by the platform environment
+        const apiKey = ""; // API key is handled by the Canvas platform environment
         const homePage = document.getElementById('homePage');
         const studioPage = document.getElementById('studioPage');
         const canvas = document.getElementById('tattooCanvas');
@@ -418,15 +422,20 @@
         const showMessage = (text) => {
             notification.textContent = text;
             notification.style.display = 'block';
-            setTimeout(() => { notification.style.display = 'none'; }, 5000);
+            notification.style.background = '#ef4444';
+            setTimeout(() => { notification.style.display = 'none'; }, 6000);
         };
 
-        // Standard fetch wrapper with exponential backoff for this environment
         async function fetchWithRetry(url, options, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, options);
                     if (response.ok) return await response.json();
+                    
+                    if (response.status === 403) {
+                        throw new Error("ACCESS FORBIDDEN - RUN IN CANVAS PREVIEW");
+                    }
+                    
                     if (response.status === 429 || response.status >= 500) {
                         const delay = Math.pow(2, i) * 1000;
                         await new Promise(res => setTimeout(res, delay));
@@ -435,7 +444,7 @@
                     const errData = await response.json().catch(() => ({}));
                     throw new Error(errData.error?.message || `HTTP ${response.status}`);
                 } catch (e) {
-                    if (i === retries - 1) throw e;
+                    if (i === retries - 1 || e.message.includes("FORBIDDEN")) throw e;
                     const delay = Math.pow(2, i) * 1000;
                     await new Promise(res => setTimeout(res, delay));
                 }
@@ -487,12 +496,10 @@
                         saturateBtn.style.display = 'flex';
                     };
                     img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                } else {
-                    throw new Error("Empty image response from engine");
                 }
             } catch (e) {
                 console.error("Engine Error:", e);
-                showMessage(e.message.includes("403") || e.message.includes("key") ? "PLATFORM KEY REQUIRED - RUN IN CANVAS" : "ENGINE OFFLINE");
+                showMessage(e.message);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
             }
@@ -532,8 +539,6 @@
                         saturateBtn.disabled = false;
                     };
                     img.src = `data:image/png;base64,${base64}`;
-                } else {
-                    throw new Error("Pigment engine failed to return image");
                 }
             } catch (e) {
                 console.error("Saturate Error:", e);
