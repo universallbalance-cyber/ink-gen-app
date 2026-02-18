@@ -619,10 +619,8 @@ async function saturate() {
     saturateBtn.disabled = true;
 
     try {
-        // 1. Get base64 PNG from canvas
         const b64 = canvas.toDataURL('image/png').split(',')[1];
 
-        // 2. Call backend
         const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -633,15 +631,24 @@ async function saturate() {
         });
 
         const data = await response.json();
+        console.log("COLOR RESPONSE:", data);
 
-        // 3. Stability backend returns: { image: "<base64>" }
-        const base64 = data.image;
-
-        if (!base64) {
-            throw new Error("No image returned from backend");
+        if (data.error) {
+            console.error("Backend error:", data.error);
+            alert("Color API error:\n\n" + data.error.toString().slice(0, 400));
+            loader.style.display = 'none';
+            saturateBtn.disabled = false;
+            return;
         }
 
-        // 4. Draw onto canvas
+        const base64 = data.image;
+        if (!base64) {
+            alert("No image returned from backend.\n\nRaw response logged in console.");
+            loader.style.display = 'none';
+            saturateBtn.disabled = false;
+            return;
+        }
+
         const img = new Image();
         img.onload = () => {
             canvas.width = img.width;
@@ -654,6 +661,7 @@ async function saturate() {
 
     } catch (err) {
         console.error("Color Fetch Error:", err);
+        alert("Color Fetch Error:\n\n" + err.toString().slice(0, 400));
         loader.style.display = 'none';
         saturateBtn.disabled = false;
     }
@@ -688,6 +696,7 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
 
