@@ -619,10 +619,10 @@ async function saturate() {
     saturateBtn.disabled = true;
 
     try {
-        // 1. Get the base64 PNG from the canvas
+        // 1. Get base64 PNG from canvas
         const b64 = canvas.toDataURL('image/png').split(',')[1];
 
-        // 2. Call your backend
+        // 2. Call backend
         const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -634,30 +634,23 @@ async function saturate() {
 
         const data = await response.json();
 
-        // 3. SDXL returns a URL, not base64
-        const imgUrl = data.output[0];
+        // 3. Stability backend returns: { image: "<base64>" }
+        const base64 = data.image;
 
-        // 4. Fetch the image and convert to blob
-        const imgResp = await fetch(imgUrl);
-        const blob = await imgResp.blob();
+        if (!base64) {
+            throw new Error("No image returned from backend");
+        }
 
-        // 5. Convert blob → base64
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = reader.result;
-
-            // 6. Draw onto canvas
-            const img = new Image();
-            img.onload = () => {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                loader.style.display = 'none';
-                saturateBtn.disabled = false;
-            };
-            img.src = base64;
+        // 4. Draw onto canvas
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            loader.style.display = 'none';
+            saturateBtn.disabled = false;
         };
-        reader.readAsDataURL(blob);
+        img.src = "data:image/png;base64," + base64;
 
     } catch (err) {
         console.error("Color Fetch Error:", err);
@@ -665,7 +658,6 @@ async function saturate() {
         saturateBtn.disabled = false;
     }
 }
-
         generateBtn.onclick = generate;
         saturateBtn.onclick = saturate;
         
@@ -696,5 +688,6 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
