@@ -165,7 +165,17 @@
             outline: none;
             letter-spacing: 0.05em;
         }
-
+		.privacy-link {
+            font-family: 'Orbitron', sans-serif;
+            color: #444; /* Match the subtle dark grey of the footer text */
+            text-decoration: none !important;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+		.privacy-link:hover {
+            color: var(--stencil-blue); /* Optional: adds a nice glow on hover */
+        }
         .gen-btn {
             background: var(--stencil-blue);
             color: black;
@@ -321,7 +331,7 @@
         </div>
         <div class="mt-12 opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
 		<div style="background: #000000; padding: 20px; text-align: center; margin-top: 50px;">
-	    <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color: white; text-decoration: underline;">Privacy Policy</a>
+	    <a href="privacy.html" class="privacy-link">Privacy Policy</a>
 	</div>
     </div>	
     <!-- STUDIO PAGE -->
@@ -397,12 +407,12 @@
 	<audio id="player" loop></audio>
 
     <script type="module">
-		// --- GLOBAL SETTINGS ---
-		const CONFIG = {
-    	MAX_FREE_LIMIT: 5,        // Set this to 3 or 5 for your 20 testers
-    	APP_IDENTITY: "INKGEN-PRO-OFFICIAL",
-    	ACCESS_PASS: "Igp1914"       // The password for browser users
-		};
+		// --- CENTRAL SETTINGS ---
+        const CONFIG = {
+            MAX_FREE_LIMIT: 5,
+            // Encrypted version of your password
+            ENCRYPTED_PASS: "SWdwMTkxNA==" 
+        };
 		// --- AUTO-RESET COUNTER EVERY DAY ---
 	(function() {
     const today = new Date().toLocaleDateString(); // Gets current date (e.g., "2/12/2026")
@@ -562,21 +572,32 @@ function init() {
 
   // 1. UPDATE THE GENERATE FUNCTION
 async function generate() {
-    const prompt = document.getElementById('promptInput').value;
-    if (!prompt) return showMessage("ENTER A DESIGN CONCEPT");
+    // 1. Check usage
+    let usage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+    
+    if (usage >= CONFIG.MAX_FREE_LIMIT) {
+        const userInput = prompt("DAILY FREE LIMIT REACHED. ENTER ACCESS PASS:");
+        
+        // Decrypt the stored password to check against user input
+        const decrypted = atob(CONFIG.ENCRYPTED_PASS);
+        
+        if (userInput !== decrypted) {
+            return showMessage("INVALID PASS. ACCESS DENIED.");
+        }
+    }
+
+    const promptInput = document.getElementById('promptInput').value;
+    if (!promptInput) return showMessage("ENTER A DESIGN CONCEPT");
 
     const generateBtn = document.getElementById('generateBtn');
     const loader = document.getElementById('loader');
-    const saturateBtn = document.getElementById('saturateBtn');
 
     try {
         generateBtn.disabled = true;
         loader.style.display = 'flex';
 
-        // 1. COMBINE SELECTED STYLE WITH PROMPT
-        const fullPrompt = getStylePrompt(selectedStyle) + " " + prompt;
+        const fullPrompt = getStylePrompt(selectedStyle) + " " + promptInput;
 
-        // 2. CALL SECURE BRIDGE
         const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -585,34 +606,29 @@ async function generate() {
 
         const data = await response.json();
         
-        // 3. HANDLE RESPONSE
         if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            // Success! Increment usage
+            localStorage.setItem('inkGen_usage', (usage + 1).toString());
+
             const base64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
-            
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
-                
-                // 4. REVEAL COLOR BUTTON (using the override)
-                if(saturateBtn) {
-                  //  saturateBtn.style.setProperty('display', 'flex', 'important');
-                }
             };
             img.src = `data:image/png;base64,${base64Data}`;
         } else {
-            throw new Error("Design generation failed");
+            throw new Error("Generation failed");
         }
     } catch (e) {
         console.error(e);
-        showMessage("STENCIL ENGINE OFFLINE. RETRYING...");
+        showMessage("ENGINE OFFLINE. RETRYING...");
         loader.style.display = 'none';
         generateBtn.disabled = false;
     }
 }
-
 // 2. UPDATE THE SATURATE (STENCIL) FUNCTION
 async function saturate() {
     loader.style.display = 'flex';
@@ -696,4 +712,5 @@ async function saturate() {
 </body>
 
 </html>
+
 
