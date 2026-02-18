@@ -167,15 +167,16 @@
         }
 		.privacy-link {
             font-family: 'Orbitron', sans-serif;
-            color: #444; 
+            color: #666; /* Lightened from #444 for better visibility */
             text-decoration: none !important;
-            font-size: 0.75rem;
-            /* Added these to match branding exactly */
+            font-size: 7px;
             font-weight: 700;
             letter-spacing: 2px;
 			text-transform: uppercase;
-            opacity: 0.8; 
+            opacity: 0.7; /* Increased from 0.5 for better visibility */
             transition: all 0.3s;
+            margin-top: 8px;
+            display: inline-block;
         }
 
         .privacy-link:hover {
@@ -335,11 +336,14 @@
             </div>
             <button id="enterStudio" class="gen-btn">Start Session</button>
         </div>
-        <div class="mt-12 opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE </div>
-		<div style="background: #000000; padding: 20px; text-align: center; margin-top: 50px;">
-	    <a href="privacy.html" class="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-	</div>
+        
+        <!-- FOOTER CREDITS & PRIVACY -->
+        <div class="mt-12 text-center">
+            <div class="opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE</div>
+            <a href="privacy.html" class="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        </div>
     </div>	
+
     <!-- STUDIO PAGE -->
     <div id="studioPage">
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
@@ -565,6 +569,7 @@ function init() {
                 tribal: "Symmetrical tribal tattoo, sharp black graphic, isolated on white background.",
                 izumi: "Izumi tattoo style, traditional Japanese aesthetic with a modern flow, black ink etching, white background.",
                 skulls: "Dark gothic skull tattoo, anatomical detail, high-contrast black and grey, isolated on white background.",
+                blackwork: "Bold blackwork tattoo, solid black ink, high contrast, isolated on white background.",
                 neo: "Neo-traditional tattoo, bold outlines, varied line weights, illustrative black ink on white background.",
                 disney: "Disney character style tattoo art, smooth curves, playful illustrative lines, black ink on white background.",
                 japanese: "Irezumi japanese tattoo style, flowing lines, black ink, white background.",
@@ -715,9 +720,4 @@ async function saturate() {
 		
     </script>
 </body>
-
 </html>
-
-
-
-
