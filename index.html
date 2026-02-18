@@ -386,7 +386,7 @@
             <div class="flex flex-col gap-2">
                 <input type="text" id="promptInput" placeholder="DESCRIBE THE FUTURE TATTOO" class="compact-input">
                 <div class="flex gap-2">
-                    <button id="saturateBtn" class="saturate-btn">COLOR</button>
+                 <!--<button id="saturateBtn" class="saturate-btn">COLOR</button> -->
                     <button id="generateBtn" class="gen-btn">Generate Ink</button>
                 </div>
             </div>
@@ -598,7 +598,7 @@ async function generate() {
                 
                 // 4. REVEAL COLOR BUTTON (using the override)
                 if(saturateBtn) {
-                    saturateBtn.style.setProperty('display', 'flex', 'important');
+                  //  saturateBtn.style.setProperty('display', 'flex', 'important');
                 }
             };
             img.src = `data:image/png;base64,${base64Data}`;
@@ -667,7 +667,7 @@ async function saturate() {
 }
 
         generateBtn.onclick = generate;
-        saturateBtn.onclick = saturate;
+        //saturateBtn.onclick = saturate;
         
         artFrame.onclick = () => document.body.classList.add('focus-mode');
         document.getElementById('exitFocus').onclick = (e) => { 
@@ -696,3 +696,4 @@ async function saturate() {
 </body>
 
 </html>
+
