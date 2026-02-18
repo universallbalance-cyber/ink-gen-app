@@ -431,8 +431,9 @@
     if (lastUseDate !== today) {
         // It's a brand new day!
         localStorage.setItem('inkGen_usage', '0');
+        localStorage.setItem('inkGen_pro_unlocked', 'false'); // Reset Pro status
         localStorage.setItem('inkGen_last_date', today);
-        console.log("Daily limit reset for a new day.");
+        console.log("Daily limit and Pro status reset for a new day.");
     }
 })();
 		const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
@@ -582,22 +583,28 @@ function init() {
 
   // 1. UPDATE THE GENERATE FUNCTION
 async function generate() {
-    // 1. Check usage
+    // 1. Check usage and Pro status
     let usage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+    let isPro = localStorage.getItem('inkGen_pro_unlocked') === 'true';
     
-    if (usage >= CONFIG.MAX_FREE_LIMIT) {
-        const userInput = prompt("DAILY FREE LIMIT REACHED. ENTER ACCESS PASS:");
+    // If not pro and limit reached, ask for password
+    if (!isPro && usage >= CONFIG.MAX_FREE_LIMIT) {
+        const userInput = prompt("DAILY FREE LIMIT REACHED. ENTER ACCESS PASS TO UNLOCK FOR 24H:");
         
         // Decrypt the stored password to check against user input
         const decrypted = atob(CONFIG.ENCRYPTED_PASS);
         
-        if (userInput !== decrypted) {
+        if (userInput === decrypted) {
+            localStorage.setItem('inkGen_pro_unlocked', 'true');
+            isPro = true;
+            showMessage("PRO ACCESS UNLOCKED FOR THE DAY.");
+        } else {
             return showMessage("INVALID PASS. ACCESS DENIED.");
         }
     }
 
-    const promptInput = document.getElementById('promptInput').value;
-    if (!promptInput) return showMessage("ENTER A DESIGN CONCEPT");
+    const pVal = document.getElementById('promptInput').value;
+    if (!pVal) return showMessage("ENTER A DESIGN CONCEPT");
 
     const generateBtn = document.getElementById('generateBtn');
     const loader = document.getElementById('loader');
@@ -606,7 +613,7 @@ async function generate() {
         generateBtn.disabled = true;
         loader.style.display = 'flex';
 
-        const fullPrompt = getStylePrompt(selectedStyle) + " " + promptInput;
+        const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
 
         const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: 'POST',
@@ -617,8 +624,10 @@ async function generate() {
         const data = await response.json();
         
         if (data.predictions && data.predictions[0].bytesBase64Encoded) {
-            // Success! Increment usage
-            localStorage.setItem('inkGen_usage', (usage + 1).toString());
+            // Success! Increment usage if not pro (pro has infinite)
+            if (!isPro) {
+                localStorage.setItem('inkGen_usage', (usage + 1).toString());
+            }
 
             const base64Data = data.predictions[0].bytesBase64Encoded;
             const img = new Image();
