@@ -415,10 +415,7 @@
         console.log("Daily limit reset for a new day.");
     }
 })();
-		import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-    	// Grab the key from the window object we created in env.js
-    	const apiKey = window.GOOGLE_API_KEY;
-		const genAI = new GoogleGenerativeAI(apiKey);
+		const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
         const homePage = document.getElementById('homePage');
         const studioPage = document.getElementById('studioPage');
         const canvas = document.getElementById('tattooCanvas');
@@ -699,4 +696,5 @@ async function saturate() {
 </body>
 
 </html>
+
 
