@@ -167,14 +167,19 @@
         }
 		.privacy-link {
             font-family: 'Orbitron', sans-serif;
-            color: #444; /* Match the subtle dark grey of the footer text */
+            color: #444; 
             text-decoration: none !important;
             font-size: 0.75rem;
-            letter-spacing: 1px;
-            transition: color 0.3s;
+            /* Added these to match branding exactly */
+            font-weight: 700;
+            letter-spacing: 2px;
+            opacity: 0.8; 
+            transition: all 0.3s;
         }
-		.privacy-link:hover {
-            color: var(--stencil-blue); /* Optional: adds a nice glow on hover */
+
+        .privacy-link:hover {
+            opacity: 1;
+            color: var(--stencil-blue);
         }
         .gen-btn {
             background: var(--stencil-blue);
@@ -449,22 +454,21 @@
         ];
 
 function init() {
+    // Set canvas dimensions
     canvas.width = 1024; 
     canvas.height = 1024;
+    
+    // Fill with pure white (Blank Canvas)
     ctx.fillStyle = "white"; 
     ctx.fillRect(0,0,1024,1024);
-    ctx.font = "bold 30px Orbitron"; 
-    ctx.fillStyle = "#333"; 
-    ctx.textAlign = "center";
-    ctx.fillText("ENGINE READY", 512, 512);
 
-    // This prevents the "Start Session" button from breaking if music files are 404
+    // Audio safe-load (keeps Start Session button working)
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
             player.src = playlist[0].url;
         }
     } catch (e) {
-        console.log("Audio not available, starting session without music.");
+        console.log("Audio bypass active.");
     }
 }
 
@@ -712,5 +716,6 @@ async function saturate() {
 </body>
 
 </html>
+
 
 
