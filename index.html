@@ -8,64 +8,59 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --ink-black: #050505; --stencil-blue: #38bdf8; --skin-tone: #f3d5b5; --gold: #f59e0b; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scrollbar-width: none; }
-        ::-webkit-scrollbar { display: none; }
-        body { font-family: 'Outfit', sans-serif; background: var(--ink-black); color: #f8fafc; margin: 0; padding: 0; height: 100dvh; width: 100vw; overflow: hidden; position: fixed; display: flex; flex-direction: column; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        /* Core Layout Fix - Ensures visibility */
+        html, body { 
+            height: 100%; 
+            width: 100%; 
+            margin: 0; 
+            padding: 0; 
+            background: var(--ink-black); 
+            color: #f8fafc; 
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+        }
+
         .header-font { font-family: 'Orbitron', sans-serif; }
 
-        /* PAGES */
-        #homePage { display: flex; flex-direction: column; height: 100dvh; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #000 100%); align-items: center; padding: 2rem 1rem; }
-        #studioPage { display: none; flex-direction: column; height: 100dvh; width: 100vw; background: #000; }
-        
-        .home-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 1.5rem; width: 100%; max-width: 340px; text-align: center; }
+        #homePage { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100dvh; 
+            width: 100%;
+            background: radial-gradient(circle at center, #111 0%, #000 100%); 
+            align-items: center; 
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
 
-        /* BUTTONS & UI */
-        .style-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; flex-shrink: 0; transition: 0.2s; }
+        #studioPage { 
+            display: none; 
+            flex-direction: column; 
+            height: 100dvh; 
+            width: 100%;
+            background: #000;
+        }
+        
+        .home-card { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(12px); 
+            border-radius: 1.5rem; 
+            padding: 1.5rem; 
+            width: 100%; 
+            max-width: 340px; 
+        }
+
+        /* Buttons */
+        .style-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; flex-shrink: 0; }
         .style-btn.active { background: var(--stencil-blue); color: black; border-color: var(--stencil-blue); }
-        .gen-btn { background: var(--stencil-blue); color: black; padding: 0.85rem; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; width: 100%; }
-        .sub-btn { width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.75rem; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; color: white; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); text-transform: uppercase; }
+        .gen-btn { background: var(--stencil-blue); color: black; padding: 0.9rem; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 100%; }
+
+        .sub-btn { width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.6rem; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; color: white; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); text-transform: uppercase; }
         .sub-btn.featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
 
-        /* STUDIO LAYOUT */
-        .studio-header { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: rgba(5, 5, 5, 0.9); display: flex; justify-content: space-between; align-items: center; }
-        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; position: relative; }
-        #artFrame { background: white; position: relative; width: min(85vw, 60vh); height: min(85vw, 60vh); border-radius: 4px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; transition: 0.4s; }
-        #artFrame.preview-active .skin-overlay { opacity: 1; }
-        canvas { width: 100%; height: 100%; background: white; }
-
-        /* MUSIC POPUP */
-        .music-pop { position: absolute; top: 110%; left: 0; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); width: 140px; border-radius: 8px; opacity: 0; pointer-events: none; z-index: 100; transition: 0.2s; }
-        .music-pop.show { opacity: 1; pointer-events: auto; }
-        .track-item { padding: 0.6rem 0.8rem; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #475569; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; }
-        .track-item.active { color: var(--stencil-blue); }
-
-        .skin-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-        .skin-swatch.active { border-color: var(--stencil-blue); transform: scale(1.1); }
-        .credit-badge { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--gold); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 8px; font-weight: 900; display: flex; align-items: center; gap: 4px; }
-        
-        #helpModal, #subOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-    </style>
-</head>
-<body>
-
-    <div id="helpModal">
-        <div class="p-8 bg-black border border-sky-500/20 max-w-[320px] text-center rounded-lg">
-            <h2 class="header-font text-sky-400 mb-6 italic">OPERATIONS MANUAL</h2>
-            <div class="text-[11px] space-y-4 opacity-70 uppercase text-left tracking-widest">
-                <p>1. SELECT BASE CANVAS TONE</p>
-                <p>2. ENTER DESIGN STUDIO</p>
-                <p>3. INPUT CONCEPT PROMPT</p>
-                <p>4. SELECT STYLE ARCHIVE</p>
-                <p>5. ENGAGE ENGINE (GENERATE)</p>
-            </div>
-            <button onclick="document.getElementById('helpModal').style.display='none'" class="mt-8 w-full py-3 bg-sky-400 text-black font-black text-[10px] header-font">CLOSE</button>
-        </div>
-    </div>
-
-    <div id="subOverlay">
-        <div class="max-w-[300px] text-center p-6">
-            <h2 class="header-font text-2xl font-black mb-2 italic text-white">OUT OF <span class="text-sky-400">INK</span></h2>
-            <button onclick="purchasePlan(50, 'Fun Plan')" class="sub-btn"><span>Fun Plan (50)</span> <span class="text-sky-400">$19.99</span></button>
-            <button onclick="purchasePlan(100, 'The Artist')" class="sub-btn featured"><span>The Artist (100)</span> <span class="text-sky-400">$49.99</span></button>
-            <button onclick="purchasePlan(20
+        /* Studio */
+        .studio-header { padding: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
+        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding:
