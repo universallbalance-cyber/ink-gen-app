@@ -486,178 +486,206 @@
 	<audio id="player" loop></audio>
 
     <script type="module">
-        // --- CENTRAL SETTINGS ---
-        const CONFIG = {
-            MAX_FREE_LIMIT: 5,
-            ENCRYPTED_PASS: "SUdQLUdvUHJvMQ==" 
-        };
+    // --- CENTRAL SETTINGS ---
+    const CONFIG = {
+        MAX_FREE_LIMIT: 5,
+        ENCRYPTED_PASS: "SUdQLUdvUHJvMQ==" // Password: SG-GoPro1
+    };
 
-        const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
-        const homePage = document.getElementById('homePage');
-        const studioPage = document.getElementById('studioPage');
-        const canvas = document.getElementById('tattooCanvas');
-        const ctx = canvas.getContext('2d');
-        const artFrame = document.getElementById('artFrame');
-        const promptInput = document.getElementById('promptInput');
-        const generateBtn = document.getElementById('generateBtn');
-        const loader = document.getElementById('loader');
-        const player = document.getElementById('player');
-        const skinOverlay = document.getElementById('skinOverlay');
-        const notification = document.getElementById('notification');
-        const subOverlay = document.getElementById('subOverlay');
-
-        let selectedStyle = 'fineline';
-        let isPlaying = false;
-        let credits = 3; // Initial credits
-
-        // --- PLAYLIST DATA ---
-        const playlist = [
-            { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
-            { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
-            { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
-        ];
-
-        // --- CORE FUNCTIONS ---
-        function init() {
-            canvas.width = 1024; 
-            canvas.height = 1024;
-            ctx.fillStyle = "white"; 
-            ctx.fillRect(0,0,1024,1024);
-            try {
-                if (playlist.length > 0) player.src = playlist[0].url;
-            } catch (e) { console.log("Audio bypass active."); }
+    // --- AUTO-RESET COUNTER EVERY DAY ---
+    (function() {
+        const today = new Date().toLocaleDateString();
+        const lastUseDate = localStorage.getItem('inkGen_last_date');
+        if (lastUseDate !== today) {
+            localStorage.setItem('inkGen_usage', '0');
+            localStorage.setItem('inkGen_pro_unlocked', 'false');
+            localStorage.setItem('inkGen_last_date', today);
         }
+    })();
 
-        const showMessage = (text) => {
-            notification.textContent = text;
-            notification.style.display = 'block';
-            setTimeout(() => { notification.style.display = 'none'; }, 5000);
-        };
+    const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
+    const homePage = document.getElementById('homePage');
+    const studioPage = document.getElementById('studioPage');
+    const canvas = document.getElementById('tattooCanvas');
+    const ctx = canvas.getContext('2d');
+    const artFrame = document.getElementById('artFrame');
+    const promptInput = document.getElementById('promptInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const loader = document.getElementById('loader');
+    const player = document.getElementById('player');
+    const notification = document.getElementById('notification');
+    const subOverlay = document.getElementById('subOverlay');
 
-        // --- SUBSCRIPTION LOGIC ---
-        window.purchasePlan = function(amt, name) {
-            credits += amt;
-            subOverlay.style.display = 'none';
-            alert(`${name} Activated! ${amt} Ink Added.`); 
-        };
+    let selectedStyle = 'fineline';
+    let isPlaying = false;
+    let credits = 3; // Starting credits for the session
 
-        // --- THE UNIFIED GENERATE FUNCTION ---
-        async function generate() {
-            // 1. Check Credits first
-            if(credits <= 0) {
-                subOverlay.style.display = 'flex';
-                return;
-            }
+    const playlist = [
+        { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
+        { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
+        { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
+    ];
 
-            const pVal = promptInput.value;
-            if (!pVal) return showMessage("ENTER A DESIGN CONCEPT");
+    function init() {
+        canvas.width = 1024; 
+        canvas.height = 1024;
+        ctx.fillStyle = "white"; 
+        ctx.fillRect(0,0,1024,1024);
+        try { if (playlist.length > 0) player.src = playlist[0].url; } catch (e) {}
+    }
 
-            try {
-                generateBtn.disabled = true;
-                loader.style.display = 'flex';
+    const showMessage = (text) => {
+        notification.textContent = text;
+        notification.style.display = 'block';
+        setTimeout(() => { notification.style.display = 'none'; }, 5000);
+    };
 
-                const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
+    // --- GLOBALLY EXPOSED FUNCTIONS (Fixed for HTML buttons) ---
+    window.purchasePlan = function(amt, name) {
+        credits += amt;
+        subOverlay.style.display = 'none';
+        alert(`${name} Activated! ${amt} Ink Added.`); 
+    };
 
-                const response = await fetch(BACKEND_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'generate', prompt: fullPrompt })
-                });
+    window.closeSub = function() {
+        subOverlay.style.display = 'none';
+    };
 
-                const data = await response.json();
-                
-                if (data.predictions && data.predictions[0].bytesBase64Encoded) {
-                    // Success! Deduct credit
-                    credits--;
-                    
-                    const base64Data = data.predictions[0].bytesBase64Encoded;
-                    const img = new Image();
-                    img.onload = () => {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        loader.style.display = 'none';
-                        generateBtn.disabled = false;
-                    };
-                    img.src = `data:image/png;base64,${base64Data}`;
-                } else {
-                    throw new Error("Generation failed");
-                }
-            } catch (e) {
-                console.error(e);
-                showMessage("ENGINE OFFLINE. RETRYING...");
-                loader.style.display = 'none';
-                generateBtn.disabled = false;
-            }
-        }
-
-        const getStylePrompt = (style) => {
-            const map = {
-                fineline: "Fine line tattoo, single needle, black ink, minimalist, isolated on white background.",
-                singlism: "Singlism style tattoo, continuous single line art, clean high-fashion aesthetic, black ink on white background.",
-                blackwork: "Bold blackwork tattoo, solid black ink, high contrast, isolated on white background.",
-                tribal: "Symmetrical tribal tattoo, sharp black graphic, isolated on white background.",
-                izumi: "Izumi tattoo style, traditional Japanese aesthetic with a modern flow, black ink etching, white background.",
-                skulls: "Dark gothic skull tattoo, anatomical detail, high-contrast black and grey, isolated on white background.",
-                neo: "Neo-traditional tattoo, bold outlines, varied line weights, illustrative black ink on white background.",
-                disney: "Disney character style tattoo art, smooth curves, playful illustrative lines, black ink on white background.",
-                japanese: "Irezumi japanese tattoo style, flowing lines, black ink, white background.",
-                cyber: "Cyber sigilism tattoo, futuristic sharp biometric lines, black ink on white background.",
-                traditional: "Old school american traditional tattoo, bold black outlines, white background.",
-                micro: "Micro realism tattoo, extremely small scale detail, etched lines, white background."
-            };
-            return map[style] || map.fineline;
-        };
-
-        // --- EVENT LISTENERS ---
-        document.getElementById('enterStudio').onclick = () => {
-            homePage.style.display = 'none';
-            studioPage.style.display = 'flex';
-            init();
-        };
-
-        document.getElementById('goHome').onclick = () => {
-            homePage.style.display = 'flex';
-            studioPage.style.display = 'none';
-        };
-
-        document.querySelectorAll('.skin-swatch').forEach(sw => {
-            sw.onclick = () => {
-                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
-                sw.classList.add('active');
-                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
-            };
-        });
-
-        document.getElementById('skinTog').onclick = function() {
-            artFrame.classList.toggle('preview-active');
-        };
-
-        document.getElementById('playBtn').onclick = async () => {
-            if(!isPlaying) {
-                try { await player.play(); isPlaying = true; document.getElementById('p-ico').innerText = '||'; } 
-                catch(e) { console.error("Audio blocked"); }
-            } else { player.pause(); isPlaying = false; document.getElementById('p-ico').innerText = '▶'; }
-        };
-
-        generateBtn.onclick = generate;
+    // --- THE UNIFIED GENERATE ENGINE ---
+    window.generate = async function() {
+        // 1. Check Daily Limit / Pro Status First
+        let usage = parseInt(localStorage.getItem('inkGen_usage') || '0');
+        let isPro = localStorage.getItem('inkGen_pro_unlocked') === 'true';
         
-        artFrame.onclick = () => document.body.classList.add('focus-mode');
-        document.getElementById('exitFocus').onclick = (e) => { 
-            e.stopPropagation(); 
-            document.body.classList.remove('focus-mode'); 
-        };
+        if (!isPro && usage >= CONFIG.MAX_FREE_LIMIT) {
+            const userInput = prompt("DAILY FREE LIMIT REACHED. ENTER ACCESS PASS TO UNLOCK:");
+            if (userInput === atob(CONFIG.ENCRYPTED_PASS)) {
+                localStorage.setItem('inkGen_pro_unlocked', 'true');
+                isPro = true;
+                showMessage("PRO ACCESS UNLOCKED.");
+            } else {
+                return showMessage("INVALID PASS.");
+            }
+        }
 
-        document.getElementById('dlBtn').onclick = () => {
-            const l = document.createElement('a');
-            l.download = `ink-${Date.now()}.png`; l.href = canvas.toDataURL(); l.click();
-        };
+        // 2. Check Session Credits
+        if(credits <= 0) {
+            subOverlay.style.display = 'flex';
+            return;
+        }
 
-        const helpModal = document.getElementById('helpModal');
-        document.getElementById('helpBtn').onclick = () => { helpModal.style.display = 'flex'; };
-        document.getElementById('closeHelp').onclick = () => { helpModal.style.display = 'none'; };
+        const pVal = promptInput.value;
+        if (!pVal) return showMessage("ENTER A DESIGN CONCEPT");
 
+        try {
+            generateBtn.disabled = true;
+            loader.style.display = 'flex';
+            const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
+
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'generate', prompt: fullPrompt })
+            });
+
+            const data = await response.json();
+            
+            if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+                // Success: Deduct credits and increment usage
+                credits--;
+                if (!isPro) localStorage.setItem('inkGen_usage', (usage + 1).toString());
+
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                };
+                img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+            } else { throw new Error("Fail"); }
+        } catch (e) {
+            showMessage("ENGINE OFFLINE. RETRYING...");
+            loader.style.display = 'none';
+            generateBtn.disabled = false;
+        }
+    };
+
+    // --- UI CONTROLS ---
+    document.getElementById('enterStudio').onclick = () => {
+        homePage.style.display = 'none';
+        studioPage.style.display = 'flex';
         init();
-    </script>
+    };
+
+    document.getElementById('goHome').onclick = () => {
+        homePage.style.display = 'flex';
+        studioPage.style.display = 'none';
+    };
+
+    document.querySelectorAll('.skin-swatch').forEach(sw => {
+        sw.onclick = () => {
+            document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+            sw.classList.add('active');
+            document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+        };
+    });
+
+    document.getElementById('skinTog').onclick = () => artFrame.classList.toggle('preview-active');
+
+    document.getElementById('playBtn').onclick = async () => {
+        if(!isPlaying) {
+            try { await player.play(); isPlaying = true; document.getElementById('p-ico').innerText = '||'; } catch(e) {}
+        } else {
+            player.pause(); isPlaying = false; document.getElementById('p-ico').innerText = '▶';
+        }
+    };
+
+    document.getElementById('generateBtn').onclick = window.generate;
+
+    document.getElementById('dlBtn').onclick = () => {
+        const l = document.createElement('a');
+        l.download = `ink-${Date.now()}.png`; l.href = canvas.toDataURL(); l.click();
+    };
+
+    document.querySelectorAll('.style-btn[data-style]').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.style-btn[data-style]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedStyle = btn.dataset.style;
+        };
+    });
+
+    const getStylePrompt = (s) => {
+        const map = {
+            fineline: "Fine line tattoo, black ink, minimalist, white background.",
+            singlism: "Singlism style tattoo, single line, white background.",
+            blackwork: "Bold blackwork tattoo, high contrast, white background.",
+            tribal: "Tribal tattoo, black graphic, white background.",
+            izumi: "Izumi tattoo style, black ink, white background.",
+            skulls: "Gothic skull tattoo, black and grey, white background.",
+            neo: "Neo-traditional tattoo, illustrative black ink, white background.",
+            disney: "Disney style tattoo, black ink, white background.",
+            japanese: "Japanese tattoo style, black ink, white background.",
+            cyber: "Cyber sigilism tattoo, sharp lines, white background.",
+            traditional: "Old school traditional tattoo, bold black outlines, white background.",
+            micro: "Micro realism tattoo, etched lines, white background."
+        };
+        return map[s] || map.fineline;
+    };
+
+    const helpModal = document.getElementById('helpModal');
+    document.getElementById('helpBtn').onclick = () => { helpModal.style.display = 'flex'; };
+    document.getElementById('closeHelp').onclick = () => { helpModal.style.display = 'none'; };
+
+    artFrame.onclick = () => document.body.classList.add('focus-mode');
+    document.getElementById('exitFocus').onclick = (e) => { 
+        e.stopPropagation(); 
+        document.body.classList.remove('focus-mode'); 
+    };
+
+    init();
+</script>
 </body>
 </html>
 
