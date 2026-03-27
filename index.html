@@ -1,121 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="referrer" content="no-referrer-when-downgrade">
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>INK-GEN PRO | Professional Tattoo Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INK-GEN PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --ink-black: #050505;
-            --stencil-blue: #38bdf8;
-            --skin-tone: #f3d5b5;
-            --gold: #f59e0b;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scrollbar-width: none; }
-        ::-webkit-scrollbar { display: none; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--ink-black);
-            color: #f8fafc;
-            margin: 0; padding: 0;
-            height: 100dvh; width: 100vw;
-            display: flex; flex-direction: column;
-            overflow: hidden; position: fixed;
-        }
-
+        :root { --ink-black: #050505; --stencil-blue: #38bdf8; --gold: #f59e0b; --skin-tone: #f3d5b5; }
+        body { font-family: 'Outfit', sans-serif; background: var(--ink-black); color: white; margin: 0; overflow: hidden; height: 100vh; }
         .header-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* Pages */
+        #homePage, #studioPage { height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; }
+        #studioPage { display: none; }
 
-        /* SCROLLABLE HOME */
-        #homePage { 
-            display: flex; flex-direction: column;
-            height: 100dvh; overflow-y: auto; 
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
-            align-items: center; padding: 2rem 1rem;
-        }
-
-        .home-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            border-radius: 1.5rem; padding: 1.5rem;
-            width: 100%; max-width: 340px; text-align: center;
-        }
-
-        /* SUBSCRIPTION UI */
+        /* Subscription Styles */
         .sub-btn {
-            width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.75rem;
+            width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.5rem;
             font-size: 10px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; display: flex; justify-content: space-between;
-            align-items: center; transition: 0.2s; color: white;
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;
         }
-        .sub-btn.featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
-
+        .featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
+        
         .credit-badge {
             background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--gold); padding: 0.4rem 0.6rem; border-radius: 6px;
-            font-size: 8px; font-weight: 900; display: flex; align-items: center; gap: 4px;
+            color: var(--gold); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 10px; font-weight: 900;
         }
 
         #subOverlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px); z-index: 2000; display: none;
-            flex-direction: column; align-items: center; justify-content: center; padding: 2rem;
+            z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* STUDIO PAGE */
-        #studioPage { display: none; flex-direction: column; height: 100dvh; width: 100vw; position: relative; }
-        .studio-header {
-            padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(5, 5, 5, 0.9); display: flex; justify-content: space-between; align-items: center;
-        }
-        .studio-footer {
-            padding: 0.75rem; padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.75rem);
-            background: rgba(5, 5, 5, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #000; position: relative; }
-        #artFrame {
-            background: white; position: relative; width: min(85vw, 60vh); height: min(85vw, 60vh);
-            border-radius: 4px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-        }
-        canvas { width: 100%; height: 100%; background: white; }
+        /* Studio Elements */
+        #artFrame { background: white; width: 300px; height: 300px; position: relative; border-radius: 8px; overflow: hidden; }
+        canvas { width: 100%; height: 100%; }
+        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; }
+        .preview-active .skin-overlay { opacity: 1; }
         
-        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; transition: 0.4s; }
-        #artFrame.preview-active .skin-overlay { opacity: 1; }
-
-        .style-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
-        .style-btn.active { background: var(--stencil-blue); color: black; border-color: var(--stencil-blue); }
-
-        .compact-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.85rem 1rem; font-size: 11px; width: 100%; color: white; outline: none; }
-        .gen-btn { background: var(--stencil-blue); color: black; padding: 0.85rem; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; width: 100%; }
-
-        .skin-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; }
-        .skin-swatch.active { border-color: var(--stencil-blue); scale: 1.1; }
-
-        #loader { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
-        .ring { width: 30px; height: 30px; border: 2px solid rgba(56,189,248,0.1); border-top: 2px solid var(--stencil-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        #notification { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 0.75rem 1.5rem; border-radius: 12px; font-size: 10px; font-weight: 700; z-index: 2000; display: none; }
+        .compact-input { background: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; color: white; width: 100%; }
+        .gen-btn { background: var(--stencil-blue); color: black; padding: 12px; border-radius: 8px; width: 100%; font-weight: 900; text-transform: uppercase; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="notification"></div>
-
     <div id="subOverlay">
-        <h2 class="header-font text-2xl font-black mb-2">OUT OF <span class="text-sky-400">INK</span></h2>
-        <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
-        <div class="w-full max-w-[300px]">
-            <button onclick="window.purchasePlan(50, 'Fun Plan')" class="sub-btn"><span>Fun Plan (50)</span><span class="text-sky-400">$19.99</span></button>
+        <h2 class="header-font text-xl mb-4 text-sky-400">OUT OF INK</h2>
+        <div class="w-64">
+            <button onclick="purchase(50)" class="sub-btn"><span>50 INK</span><span>$19.99</span></button>
+            <button onclick="purchase(100)" class="sub-btn featured"><span>100 INK</span><span>$49.99</span></button>
+        </div>
+        <button onclick="hideSub()" class="mt-6 text-[10px] opacity-50 uppercase">Maybe Later</button>
+    </div>
+
+    <div id="homePage" class="p-8 text-center">
+        <h1 class="header-font text-3xl mt-20 mb-2">INK-GEN <span class="text-sky-400">PRO</span></h1>
+        <div class="bg-white/5 border border-white/10 p-6 rounded-2xl w-full max-w-xs mt-10">
+            <button id="startBtn" class="gen-btn mb-6">START SESSION</button>
+            <div class="border-t border-white/10 pt-4">
+                <p class="text-[8px] opacity-30 mb-2 uppercase">Subscription Plans</p>
+                <button onclick="purchase(50)" class="sub-btn"><span>50 INK</span><span>$19.99</span></button>
+                <button onclick="purchase(100)" class="sub-btn featured"><span>100 INK</span><span>$49.99</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="studioPage">
+        <div class="w-full p-4 flex justify-between items-center border-b border-white/10">
+            <button onclick="goHome()" class="text-xs opacity-50">BACK</button>
+            <div class="credit-badge">INK: <span id="inkVal">3</span></div>
+            <button id="skinTog" class="text-[10px] border border-white/20 p-1 rounded">SKIN PREVIEW</button>
+        </div>
+
+        <div class="flex-1 flex items-center justify-center">
+            <div id="artFrame">
+                <div class="skin-overlay"></div>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+
+        <div class="w-full p-6 bg-black">
+            <input type="text" id="prompt" placeholder="DESCRIBE DESIGN" class="compact-input">
+            <button id="genBtn" class="gen-btn">GENERATE</button>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND = "https://ink-gen-api-365969989524.us-central1.run.app";
+        let credits = 3;
+
+        // Navigation
+        document.getElementById('startBtn').onclick = () => {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('studioPage').style.display = 'flex';
+        };
+
+        function goHome() {
+            document.getElementById('homePage').style.display = 'flex';
+            document.getElementById('studioPage').style.display = 'none';
+        }
+
+        // Subscriptions
+        window.purchase = (amt) => {
+            credits += amt;
+            document.getElementById('inkVal').innerText = credits;
+            document.getElementById('subOverlay').style.display = 'none';
+            alert("Refill Successful!");
+        };
+
+        function hideSub() { document.getElementById('subOverlay').style.display = 'none'; }
+
+        // Generator
+        document.getElementById('genBtn').onclick = async () => {
+            if(credits <= 0) {
+                document.getElementById('subOverlay').style.display = 'flex';
+                return;
+            }
+
+            const p = document.getElementById('prompt').value;
+            if(!p) return;
+
+            try {
+                document.getElementById('genBtn').innerText = "INKING...";
+                const res = await fetch(BACKEND, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'generate', prompt: "tattoo " + p })
+                });
+                const data = await res.json();
+                if(data.predictions) {
+                    credits--;
+                    document.getElementById('inkVal').innerText = credits;
+                    const img = new Image();
+                    img.onload = () => {
+                        const ctx = document.getElementById('canvas').getContext('2d');
+                        ctx.drawImage(img, 0, 0, 300, 300);
+                        document.getElementById('genBtn').innerText = "GENERATE";
+                    };
+                    img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                }
+            } catch(e) {
+                document.getElementById('genBtn').innerText = "GENERATE";
+            }
+        };
+
+        document.getElementById('skinTog').onclick = () => {
+            document.getElementById('artFrame').classList.toggle('preview-active');
+        };
+    </script>
+</body>
+</html>
