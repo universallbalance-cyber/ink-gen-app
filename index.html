@@ -3,64 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>INK-GEN PRO | Professional Tattoo Studio</title>
+    <title>INK-GEN PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --ink-black: #050505; --stencil-blue: #38bdf8; --skin-tone: #f3d5b5; --gold: #f59e0b; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* Core Layout Fix - Ensures visibility */
+        /* THE FIX: Absolute positioning prevents the black-hole collapse */
         html, body { 
-            height: 100%; 
-            width: 100%; 
-            margin: 0; 
-            padding: 0; 
-            background: var(--ink-black); 
-            color: #f8fafc; 
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden;
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; color: #fff; font-family: 'Outfit', sans-serif;
+            overflow: hidden; position: fixed;
         }
+
+        .page {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; overflow-y: auto;
+        }
+
+        #homePage { display: flex; background: radial-gradient(circle at center, #151515 0%, #000 100%); align-items: center; padding: 2rem 1rem; }
+        #studioPage { background: #000; }
 
         .header-font { font-family: 'Orbitron', sans-serif; }
-
-        #homePage { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100dvh; 
-            width: 100%;
-            background: radial-gradient(circle at center, #111 0%, #000 100%); 
-            align-items: center; 
-            padding: 2rem 1rem;
-            overflow-y: auto;
-        }
-
-        #studioPage { 
-            display: none; 
-            flex-direction: column; 
-            height: 100dvh; 
-            width: 100%;
-            background: #000;
-        }
         
-        .home-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            backdrop-filter: blur(12px); 
-            border-radius: 1.5rem; 
-            padding: 1.5rem; 
-            width: 100%; 
-            max-width: 340px; 
-        }
-
-        /* Buttons */
-        .style-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; flex-shrink: 0; }
-        .style-btn.active { background: var(--stencil-blue); color: black; border-color: var(--stencil-blue); }
-        .gen-btn { background: var(--stencil-blue); color: black; padding: 0.9rem; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 100%; }
-
-        .sub-btn { width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.6rem; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; color: white; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); text-transform: uppercase; }
+        /* UI Components */
+        .home-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-radius: 1.5rem; padding: 1.5rem; width: 100%; max-width: 340px; }
+        .style-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
+        .style-btn.active { background: var(--stencil-blue); color: #000; border-color: var(--stencil-blue); }
+        .gen-btn { background: var(--stencil-blue); color: #000; padding: 1rem; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 100%; }
+        
+        .sub-btn { width: 100%; padding: 0.8rem; border-radius: 12px; margin-top: 0.6rem; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); text-transform: uppercase; }
         .sub-btn.featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
 
-        /* Studio */
-        .studio-header { padding: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
-        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding:
+        /* Studio Specifics */
+        #artFrame { background: #fff; position: relative; width: min(80vw, 50vh); height: min(80vw, 50vh); margin: auto; border-radius: 4px; overflow: hidden; }
+        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; }
+        .preview-active .skin-overlay { opacity: 1; }
+        
+        /* Music Popup */
+        #musicPop { position: absolute; top: 50px; left: 10px; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); width: 150px; border-radius: 8px; display: none; z-index: 100; }
+        .track-item { padding: 0.8rem; font-size: 10px; font-weight: 700; color: #64748b; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        
+        .skin-swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+        .skin-swatch.active { border-color: var(--stencil-blue); transform: scale(1.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="subOverlay" class="fixed inset-0 bg-black/95 z-[2000] hidden items-center justify-center p-6">
+        <div class="w-full max-w-[320px] text-center">
+            <h2 class="header-font text-2xl font-black mb-4 italic">OUT OF <span class="text-sky-400">INK</span></h2>
+            <button onclick="addInk(50)" class="sub-btn"><span>Fun Plan (50)</span> <span class="text-sky-400">$19.99</span></button>
+            <button onclick="addInk(100)" class="sub-btn featured"><span>The Artist (100)</span> <span class="text-sky-400">$49.99</span></button>
+            <button onclick="addInk(200)" class="sub-btn"><span>Tattoo Master (200)</span> <span class="text-sky-400">$99.99</span></button>
+            <button onclick="closeSub()" class="mt-8 text-[9px] opacity-30 uppercase font-bold">Cancel</button>
+        </div>
+    </div>
+
+    <div id="homePage" class="page">
+        <div class="mt-10 mb-8 text-center">
+            <h1 class="header-font text-4xl font-black italic tracking-tighter">INK-GEN <span class="text-sky-400">PRO</span></h1>
+            <p class="text-[8px] tracking-[0.4em] opacity-30 font-bold uppercase mt-1">Tattoo Image Engine</p>
+        </div>
+
+        <div class="home-card">
+            <h2 class="header-font text-[10px] opacity-50 uppercase mb-5 text-center">Select Canvas</h2>
+            <div class="flex justify-between mb-8">
+                <div class="skin-swatch active" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
+                <div class="skin-swatch" style="background: #e5c298;" data-color="#e5c298"></div>
+                <div class="skin-swatch" style="background: #c69061;" data-color="#c69061"></div>
+                <div class="skin-swatch" style="background: #8d5524;" data-color="#8d5524"></div>
+                <div class="skin-swatch" style="background: #3c2005;" data-color="#3c2005"></div>
+            </div>
+            <button id="startBtn" class="gen-btn mb-8">Start Session</button>
+            
+            <div class="border-t border-white/5 pt-6">
+                <h3 class="header-font text-[8px] opacity-30 uppercase mb-3">Refill Ink</h3>
+                <button onclick="addInk(50)" class="sub-btn"><span>Fun Plan (50)</span><span class="text-sky-400">$19.99</span></button>
+                <button onclick="addInk(100)" class="sub-btn featured"><span>The Artist (100)</span><span class="text-sky-400">$49.99</span></button>
+                <button onclick="addInk(200)" class="sub-btn"><span>Tattoo Master (200)</span><span class="text-sky-400">$99.99</span></button>
+            </div>
+        </div>
+        <div class="mt-10 opacity-20 text-[8px] uppercase font-black">MICHAEL TAYLOR & UNIVERSALL BALANCE</div>
+    </div>
+
+    <div id="studioPage" class="page">
+        <header class="p-3 border-b border-white/5 flex justify-between items-center">
+            <button onclick="showHome()" class="opacity-30 p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="flex items-center gap-2">
+                <button id="playBtn" class="style-btn !px-3">▶</button>
+                <button onclick="toggleMusic()" id="trackDisplay" class="style-btn min-w-[80px]">Track I</button>
+                <div id="musicPop">
+                    <div class="track-item" onclick="setTrack(0)">Spiritual I</div>
+                    <div class="track-item" onclick="setTrack(1)">Spiritual II</div>
+                    <div class="track-item" onclick="setTrack(2)">Spiritual III</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <div class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-1 rounded text-[9px] font-black">INK: <span id="inkCount">3</span></div>
+                <button onclick="toggleSkin()" class="style-btn">Preview</button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex items-center justify-center p-4">
+            <div id="artFrame">
+                <div class="skin-overlay"></div>
+                <canvas id="tattooCanvas" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <footer class="p-4 bg-black border-t border-white/5">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-2">
+                <button class="style-btn active" data-style="fineline">Fine Line</button>
+                <button class="style-btn" data-style="singlism">Singlism</button>
+                <button class="style-btn" data-style="blackwork">Blackwork</button>
+                <button class="style-btn" data-style="tribal">Tribal</button>
+                <button class="style-btn" data-style="izumi">Izumi</button>
+                <button class="style-btn" data-style="neo trad">Neo Trad</button>
+                <button class="style-btn" data-style="japanese">Japanese</button>
+                <button class="style-btn" data-style="traditional">Trad</button>
+            </div>
+            <input type="text" placeholder="DESCRIBE CONCEPT" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[12px] outline-none mb-2">
+            <button class="gen-btn">Generate Ink</button>
+        </footer>
+    </div>
+
+    <audio id="player" loop></audio>
+
+    <script>
+        let ink = 3;
+        let playing = false;
+        const playlist = [
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3",
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3",
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3"
+        ];
+
+        const player = document.getElementById('player');
+        player.src = playlist[0];
+
+        // Navigation
+        function showStudio() {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('studioPage').style.display = 'flex';
+        }
+        function showHome() {
+            document.getElementById('homePage').style.display = 'flex';
+            document.getElementById('studioPage').style.display = 'none';
+        }
+        document.getElementById('startBtn').onclick = showStudio;
+
+        // Subscriptions
+        function addInk(amt) {
+            ink += amt;
+            document.getElementById('inkCount').innerText = ink;
+            document.getElementById('subOverlay').classList.add('hidden');
+            document.getElementById('subOverlay').classList.remove('flex');
+            alert("Refill Successful!");
+        }
+        function closeSub() {
+            document.getElementById('subOverlay').classList.add('hidden');
+            document.getElementById('subOverlay').classList.remove('flex');
+        }
+
+        // Music
+        function toggleMusic() {
+            const pop = document.getElementById('musicPop');
+            pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
+        }
+        function setTrack(idx) {
+            player.src = playlist[idx];
+            document.getElementById('trackDisplay').innerText = "Track " + (idx + 1);
+            if(playing) player.play();
+            document.getElementById('musicPop').style.display = 'none';
+        }
+        document.getElementById('playBtn').onclick = function() {
+            if(!playing) { player.play(); this.innerText = "⏸"; }
+            else { player.pause(); this.innerText = "▶"; }
+            playing = !playing;
+        }
+
+        // Skin Tone
+        document.querySelectorAll('.skin-swatch').forEach(sw => {
+            sw.onclick = () => {
+                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+            };
+        });
+        function toggleSkin() {
+            document.getElementById('artFrame').classList.toggle('preview-active');
+        }
+
+        // Style Selection
+        document.querySelectorAll('[data-style]').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+        });
+    </script>
+</body>
+</html>
