@@ -296,12 +296,81 @@
             display: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
+	/* Refill/Subscription Overlay */
+#subOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.sub-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 12px;
+    margin-top: 0.75rem;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: white;
+}
+
+.sub-btn.featured { 
+    border-color: #38bdf8; /* Stencil Blue */
+    background: rgba(56, 189, 248, 0.1); 
+}
+
+.credit-badge {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b; /* Gold */
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
     </style>
 </head>
 <body>
 
-    <div id="notification"></div>
-
+<div id="notification"></div>
+ <!-- REFILL OVERLAY -->
+<div id="subOverlay">
+    <h2 class="header-font text-2xl font-black mb-2">OUT OF <span class="text-sky-400">INK</span></h2>
+    <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
+    
+    <div class="w-full max-w-[300px]">
+        <button onclick="purchasePlan(50, 'Fun Plan')" class="sub-btn">
+            <span>Fun Plan (50 Tattoos)</span>
+            <span class="text-sky-400">$19.99</span>
+        </button>
+        <button onclick="purchasePlan(100, 'The Artist')" class="sub-btn featured">
+            <span>The Artist (100 Tattoos)</span>
+            <span class="text-sky-400">$49.99</span>
+        </button>
+        <button onclick="purchasePlan(200, 'Tattoo Master')" class="sub-btn">
+            <span>Tattoo Master (200 Tattoos)</span>
+            <span class="text-sky-400">$99.99</span>
+        </button>
+    </div>
+    <button onclick="document.getElementById('subOverlay').style.display='none'" class="mt-8 text-[8px] uppercase tracking-widest opacity-30 font-bold">Maybe Later</button>
+</div>
     <!-- HOME PAGE -->
     <div id="homePage">
 		<button id="helpBtn" style="position: fixed; bottom: 150px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>
@@ -449,16 +518,40 @@
         const player = document.getElementById('player');
         const skinOverlay = document.getElementById('skinOverlay');
         const notification = document.getElementById('notification');
+		const subOverlay = document.getElementById('subOverlay');
+		const inkVal = document.getElementById('inkVal');
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-        
+        let credits = 3; // Initial starting credits
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
             { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
             { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
         ];
+// Updates the number shown in the Gold badge [cite: 94]
+function updateInk() {
+    if(inkVal) inkVal.textContent = credits;
+}
 
+// Function called when a user clicks a plan [cite: 95]
+function purchasePlan(amt, name) {
+    credits += amt;
+    updateInk();
+    subOverlay.style.display = 'none';
+    alert(`${name} Activated! ${amt} Ink Added.`); 
+}
+
+// Add this check inside your existing Generate function 
+async function generate() {
+    if(credits <= 0) {
+        subOverlay.style.display = 'flex';
+        return;
+    }
+    // ... your existing generation code ...
+    credits--; // Subtract 1 credit after successful generation [cite: 125]
+    updateInk();
+}
 function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
