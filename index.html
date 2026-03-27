@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -19,7 +16,7 @@
         body { font-family: 'Outfit', sans-serif; background: var(--ink-black); color: #f8fafc; margin: 0; padding: 0; height: 100dvh; width: 100vw; display: flex; flex-direction: column; overflow: hidden; position: fixed; }
         .header-font { font-family: 'Orbitron', sans-serif; }
 
-        /* HOME UI */
+        /* HOME SCREEN */
         #homePage { display: flex; flex-direction: column; height: 100dvh; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #000 100%); align-items: center; padding: 2rem 1rem; }
         .home-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 1.5rem; width: 100%; max-width: 340px; text-align: center; }
         
@@ -28,27 +25,36 @@
         .sub-btn.featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
         .credit-badge { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--gold); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 8px; font-weight: 900; display: flex; align-items: center; gap: 4px; }
 
-        /* STUDIO UI */
+        /* STUDIO SCREEN */
         #studioPage { display: none; flex-direction: column; height: 100dvh; width: 100vw; position: relative; }
         .studio-header { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: rgba(5, 5, 5, 0.9); display: flex; justify-content: space-between; align-items: center; }
-        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #000; position: relative; }
-        #artFrame { background: white; position: relative; width: min(85vw, 60vh); height: min(85vw, 60vh); border-radius: 4px; overflow: hidden; }
-        canvas { width: 100%; height: 100%; }
-        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; }
-        #artFrame.preview-active .skin-overlay { opacity: 1; }
         
-        .style-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase; color: #94a3b8; }
+        /* MUSIC POPUP */
+        .music-pop { position: absolute; top: 110%; left: 0; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); width: 140px; border-radius: 8px; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 100; }
+        .music-pop.show { opacity: 1; pointer-events: auto; }
+        .track-item { padding: 0.6rem 0.8rem; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #475569; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; }
+        .track-item.active { color: var(--stencil-blue); }
+
+        /* CANVAS */
+        .canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #000; position: relative; }
+        #artFrame { background: white; position: relative; width: min(85vw, 60vh); height: min(85vw, 60vh); border-radius: 4px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; transition: 0.4s; }
+        #artFrame.preview-active .skin-overlay { opacity: 1; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
+
+        /* FOOTER & BUTTONS */
+        .style-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
         .style-btn.active { background: var(--stencil-blue); color: black; border-color: var(--stencil-blue); }
         .gen-btn { background: var(--stencil-blue); color: black; padding: 0.85rem; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; width: 100%; }
         .compact-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.85rem 1rem; font-size: 11px; width: 100%; color: white; outline: none; }
 
-        #subOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
-        .skin-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-        .skin-swatch.active { border-color: var(--stencil-blue); transform: scale(1.1); }
-        
-        #loader { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #loader { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
         .ring { width: 30px; height: 30px; border: 2px solid rgba(56,189,248,0.1); border-top: 2px solid var(--stencil-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .skin-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; }
+        .skin-swatch.active { border-color: var(--stencil-blue); transform: scale(1.1); }
+        #subOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
     </style>
 </head>
 <body>
@@ -60,21 +66,7 @@
             <button onclick="buy(100)" class="sub-btn featured"><span>The Artist (100)</span><span class="text-sky-400">$49.99</span></button>
             <button onclick="buy(200)" class="sub-btn"><span>Tattoo Master (200)</span><span class="text-sky-400">$99.99</span></button>
         </div>
-        <button onclick="document.getElementById('subOverlay').style.display='none'" class="mt-8 text-[8px] opacity-30 font-bold uppercase">Maybe Later</button>
-    </div>
-
-    <div id="helpModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-        <div style="width: 85%; max-width: 400px; padding: 30px; border: 1px solid rgba(56, 189, 248, 0.2); background: #050505; border-radius: 4px; color: white; text-align: center;">
-            <h2 class="header-font text-sky-400 mb-6">OPERATIONS MANUAL</h2>
-            <div style="font-size: 11px; line-height: 2.5; opacity: 0.7; text-transform: uppercase; text-align: left;">
-                <p>1. SET BASE CANVAS TONE</p>
-                <p>2. ENTER DESIGN STUDIO</p>
-                <p>3. INPUT CONCEPT PROMPT</p>
-                <p>4. SELECT STYLE ARCHIVE</p>
-                <p>5. ENGAGE ENGINE</p>
-            </div>
-            <button id="closeHelp" class="gen-btn mt-8">CLOSE MANUAL</button>
-        </div>
+        <button onclick="document.getElementById('subOverlay').style.display='none'" class="mt-8 text-[8px] opacity-30 font-bold uppercase tracking-widest">Maybe Later</button>
     </div>
 
     <div id="homePage">
@@ -84,8 +76,8 @@
         </div>
 
         <div class="home-card">
-            <h2 class="header-font text-[9px] opacity-50 uppercase mb-4">Select Base Canvas</h2>
-            <div class="flex justify-between mb-6">
+            <h2 class="header-font text-[9px] opacity-50 uppercase mb-4 tracking-widest">Select Base Canvas</h2>
+            <div class="flex justify-between mb-8">
                 <div class="skin-swatch active" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
                 <div class="skin-swatch" style="background: #e5c298;" data-color="#e5c298"></div>
                 <div class="skin-swatch" style="background: #c69061;" data-color="#c69061"></div>
@@ -95,26 +87,41 @@
             <button id="enterStudio" class="gen-btn mb-6">Start Session</button>
 
             <div class="border-t border-white/5 pt-6">
-                <h3 class="header-font text-[8px] opacity-30 uppercase mb-3 text-center">Subscription Plans</h3>
                 <button onclick="buy(50)" class="sub-btn"><span>Fun Plan (50)</span><span class="text-sky-400">$19.99</span></button>
                 <button onclick="buy(100)" class="sub-btn featured"><span>The Artist (100)</span><span class="text-sky-400">$49.99</span></button>
                 <button onclick="buy(200)" class="sub-btn"><span>Tattoo Master (200)</span><span class="text-sky-400">$99.99</span></button>
             </div>
         </div>
-        <button id="helpBtn" class="mt-6 opacity-30 text-[10px] font-bold">OPERATIONS MANUAL (?)</button>
-        <div class="mt-4"><a href="privacy.html" class="header-font text-[7px] opacity-20 uppercase tracking-widest">Privacy Policy</a></div>
+
+        <div class="mt-12 text-center">
+            <div class="opacity-30 text-[8px] uppercase tracking-[0.3em] font-black">By MICHAEL TAYLOR & UNIVERSALL BALANCE</div>
+            <div class="mt-6 flex flex-col items-center gap-4">
+                <button id="helpBtn" class="opacity-40 text-[9px] font-bold border border-white/10 px-4 py-2 rounded-full uppercase tracking-widest">Operations Manual (?)</button>
+                <a href="privacy.html" class="header-font text-[7px] opacity-20 uppercase tracking-[0.2em]">Privacy Policy</a>
+            </div>
+        </div>
     </div>
 
     <div id="studioPage">
         <header class="studio-header">
-            <button id="goHome" class="opacity-30"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="flex items-center gap-1 relative">
+                <button id="goHome" class="p-2 opacity-30 mr-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+                <button id="playBtn" class="style-btn !px-3">▶</button>
+                <button id="musicMenu" class="style-btn min-w-[70px]">Track I</button>
+                <div id="musicPop" class="music-pop">
+                    <div class="track-item active" data-idx="0">Track I</div>
+                    <div class="track-item" data-idx="1">Track II</div>
+                    <div class="track-item" data-idx="2">Track III</div>
+                </div>
+            </div>
+
             <div class="flex gap-2 items-center">
                 <div class="credit-badge">
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
                     <span id="inkVal">3</span>
                 </div>
-                <button id="skinTog" class="style-btn">Skin Preview</button>
-                <button id="dlBtn" class="style-btn !px-2">DL</button>
+                <button id="skinTog" class="style-btn">Preview</button>
+                <button id="dlBtn" class="style-btn !px-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></button>
             </div>
         </header>
 
@@ -127,27 +134,39 @@
         </div>
 
         <footer class="p-4 bg-black/95 border-t border-white/5">
-            <div class="flex gap-2 overflow-x-auto pb-3 mb-2">
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-2 no-scrollbar">
                 <button class="style-btn active" data-style="fineline">Fine Line</button>
+                <button class="style-btn" data-style="japanese">Japanese</button>
+                <button class="style-btn" data-style="disney">Disney</button>
                 <button class="style-btn" data-style="blackwork">Blackwork</button>
-                <button class="style-btn" data-style="traditional">Trad</button>
                 <button class="style-btn" data-style="skulls">Skulls</button>
+                <button class="style-btn" data-style="cyber">Cyber</button>
+                <button class="style-btn" data-style="traditional">Trad</button>
             </div>
-            <input type="text" id="promptInput" placeholder="DESCRIBE DESIGN" class="compact-input mb-2">
-            <button id="generateBtn" class="gen-btn">Generate Ink</button>
+            <div class="flex flex-col gap-2">
+                <input type="text" id="promptInput" placeholder="DESCRIBE DESIGN CONCEPT" class="compact-input">
+                <button id="generateBtn" class="gen-btn">Generate Ink</button>
+            </div>
         </footer>
     </div>
+
+    <audio id="player" loop></audio>
 
     <script>
         const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
         let credits = 3;
         let selectedStyle = 'fineline';
+        let isPlaying = false;
+        const playlist = [
+            { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
+            { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
+            { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
+        ];
 
         window.buy = (amt) => {
             credits += amt;
             document.getElementById('inkVal').innerText = credits;
             document.getElementById('subOverlay').style.display = 'none';
-            alert("Ink Refilled!");
         };
 
         async function generate() {
@@ -160,7 +179,7 @@
                 btn.disabled = true; document.getElementById('loader').style.display = 'flex';
                 const res = await fetch(BACKEND_URL, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " " + p })
+                    body: JSON.stringify({ action: 'generate', prompt: selectedStyle + " tattoo " + p })
                 });
                 const data = await res.json();
                 if (data.predictions) {
@@ -179,17 +198,32 @@
             } catch (e) { document.getElementById('loader').style.display = 'none'; btn.disabled = false; }
         }
 
+        // Music
+        const player = document.getElementById('player');
+        document.getElementById('playBtn').onclick = () => {
+            if (!player.src) player.src = playlist[0].url;
+            if (isPlaying) { player.pause(); document.getElementById('playBtn').innerText = "▶"; }
+            else { player.play(); document.getElementById('playBtn').innerText = "⏸"; }
+            isPlaying = !isPlaying;
+        };
+        document.getElementById('musicMenu').onclick = () => document.getElementById('musicPop').classList.toggle('show');
+        document.querySelectorAll('.track-item').forEach(item => {
+            item.onclick = () => {
+                player.src = playlist[item.dataset.idx].url;
+                document.getElementById('musicMenu').innerText = playlist[item.dataset.idx].name;
+                if (isPlaying) player.play();
+                document.getElementById('musicPop').classList.remove('show');
+            };
+        });
+
+        // UI Handlers
         document.getElementById('enterStudio').onclick = () => { document.getElementById('homePage').style.display = 'none'; document.getElementById('studioPage').style.display = 'flex'; };
         document.getElementById('goHome').onclick = () => { document.getElementById('homePage').style.display = 'flex'; document.getElementById('studioPage').style.display = 'none'; };
         document.getElementById('generateBtn').onclick = generate;
         document.getElementById('skinTog').onclick = () => document.getElementById('artFrame').classList.toggle('preview-active');
-        document.getElementById('helpBtn').onclick = () => document.getElementById('helpModal').style.display = 'flex';
-        document.getElementById('closeHelp').onclick = () => document.getElementById('helpModal').style.display = 'none';
         document.getElementById('dlBtn').onclick = () => {
-            const link = document.createElement('a');
-            link.download = 'tattoo.png';
-            link.href = document.getElementById('tattooCanvas').toDataURL();
-            link.click();
+            const link = document.createElement('a'); link.download = 'ink.png';
+            link.href = document.getElementById('tattooCanvas').toDataURL(); link.click();
         };
 
         document.querySelectorAll('.skin-swatch').forEach(sw => {
@@ -200,13 +234,11 @@
             };
         });
 
-        document.querySelectorAll('.style-btn').forEach(btn => {
+        document.querySelectorAll('[data-style]').forEach(btn => {
             btn.onclick = () => {
-                if(btn.dataset.style) {
-                    document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedStyle = btn.dataset.style;
-                }
+                document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedStyle = btn.dataset.style;
             };
         });
     </script>
