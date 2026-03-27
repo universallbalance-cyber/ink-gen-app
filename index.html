@@ -4,7 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>INK-GEN PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>INK-GEN PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --ink-black: #050505; --stencil-blue: #38bdf8; --skin-tone: #f3d5b5; --gold: #f59e0b; }
+        
+        html, body { 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            background: #000; color: #fff; font-family: 'Outfit', sans-serif;
+            overflow: hidden; position: fixed; 
+        }
+
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; background: #000;
+        }
+
+        #homePage { display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #151515 0%, #000 100%); overflow-y: auto; }
+        
+        .home-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 25px; width: 90%; max-width: 340px; text-align: center; backdrop-filter: blur(12px); }
+        .header-font { font-family: 'Orbitron', sans-serif; }
+
+        .style-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; white-space: nowrap; flex-shrink: 0; }
+        .style-btn.active { background: var(--stencil-blue); color: #000; border-color: var(--stencil-blue); }
+        
+        .gen-btn { background: var(--stencil-blue); color: #000; padding: 16px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; width: 100%; cursor: pointer; }
+        
+        .sub-btn { width: 100%; padding: 12px; border-radius: 10px; margin-top: 8px; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; text-transform: uppercase; }
+        .sub-btn.featured { border-color: var(--stencil-blue); background: rgba(56, 189, 248, 0.1); }
+
+        #artFrame { background: #fff; position: relative; width: 300px; height: 300px; margin: auto; border-radius: 4px; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+        .skin-overlay { position: absolute; inset: 0; background: var(--skin-tone); mix-blend-mode: multiply; opacity: 0; pointer-events: none; }
+        .preview-active .skin-overlay { opacity: 1; }
+        
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        #musicPop { position: absolute; top: 60px; left: 10px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; display: none; z-index: 100; width: 150px; }
+        
+        .skin-swatch { width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+        .skin-swatch.active { border-color: var(--stencil-blue); transform: scale(1.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="helpModal" class="modal">
+        <div class="p-8 border border-sky-500/30 bg-black rounded-2xl text-center max-w-xs">
+            <h2 class="header-font text-sky-400 text-xl mb-6 italic">OPERATIONS MANUAL</h2>
+            <div class="text-[11px] space-y-4 opacity-70 uppercase text-left tracking-widest">
+                <p>1. PICK SKIN TONE</p>
+                <p>2. ENTER STUDIO</p>
+                <p>3. TYPE DESIGN PROMPT</p>
+                <p>4. SELECT TATTOO STYLE</p>
+                <p>5. GENERATE INK</p>
+            </div>
+            <button onclick="closeHelp()" class="mt-10 w-full py-4 bg-sky-400 text-black font-black text-[10px] header-font rounded-xl">CLOSE MANUAL</button>
+        </div>
+    </div>
+
+    <div id="subOverlay" class="modal">
+        <div class="w-full max-w-xs text-center">
+            <h2 class="header-font text-2xl font-black mb-4 italic">OUT OF <span class="text-sky-400">INK</span></h2>
+            <button onclick="addInk(50)" class="sub-btn"><span>Fun Plan (50)</span> <span class="text-sky-400">$19.99</span></button>
+            <button onclick="addInk(100)" class="sub-btn featured"><span>The Artist (100)</span> <span class="text-sky-400">$49.99</span></button>
+            <button onclick="addInk(200)" class="sub-btn"><span>Tattoo Master (200)</span> <span class="text-sky-400">$99.99</span></button>
+            <button onclick="closeSub()" class="mt-8 text-[9px] opacity-30 uppercase font-bold tracking-widest">Maybe Later</button>
+        </div>
+    </div>
+
+    <div id="homePage" class="screen" style="display: flex;">
+        <div class="flex flex-col items-center w-full py-10">
+            <div class="mb-8 text-center">
+                <h1 class="header-font text-4xl font-black italic tracking-tighter text-white">INK-GEN <span class="text-sky-400">PRO</span></h1>
+                <p class="text-[8px] tracking-[0.4em] opacity-30 font-bold uppercase mt-1">Tattoo Image Generating Engine</p>
+            </div>
+
+            <div class="home-card">
+                <h2 class="text-[10px] opacity-50 uppercase mb-5 tracking-[0.2em] font-bold">Select Base Canvas</h2>
+                <div class="flex justify-between mb-8">
+                    <div class="skin-swatch active" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
+                    <div class="skin-swatch" style="background: #e5c298;" data-color="#e5c298"></div>
+                    <div class="skin-swatch" style="background: #c69061;" data-color="#c69061"></div>
+                    <div class="skin-swatch" style="background: #8d5524;" data-color="#8d5524"></div>
+                    <div class="skin-swatch" style="background: #3c2005;" data-color="#3c2005"></div>
+                </div>
+                
+                <button onclick="goStudio()" class="gen-btn mb-8">Start Session</button>
+
+                <div class="border-t border-white/5 pt-6 text-left">
+                    <h3 class="text-[8px] opacity-30 uppercase mb-4 font-bold tracking-widest">Subscription Plans</h3>
+                    <button onclick="addInk(50)" class="sub-btn"><span>Fun Plan (50)</span><span class="text-sky-400">$19.99</span></button>
+                    <button onclick="addInk(100)" class="sub-btn featured"><span>The Artist (100)</span><span class="text-sky-400">$49.99</span></button>
+                    <button onclick="addInk(200)" class="sub-btn"><span>Tattoo Master (200)</span><span class="text-sky-400">$99.99</span></button>
+                </div>
+            </div>
+
+            <div class="mt-12 flex flex-col items-center gap-4">
+                <button onclick="openHelp()" class="text-[9px] opacity-40 font-bold border border-white/10 px-5 py-2 rounded-full uppercase tracking-widest">Operations Manual (?)</button>
+                <div class="opacity-30 text-[8px] uppercase tracking-widest font-black">MICHAEL TAYLOR & UNIVERSALL BALANCE</div>
+                <a href="privacy.html" class="header-font text-[7px] opacity-20 uppercase tracking-[0.3em] hover:opacity-50 transition-opacity">Privacy Policy</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="studioPage" class="screen">
+        <header class="p-3 border-b border-white/5 flex justify-between items-center bg-black/90 backdrop-blur-md">
+            <button onclick="goHome()" class="opacity-30 p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button>
+            
+            <div class="flex items-center gap-1 relative">
+                <button id="playBtn" onclick="togglePlay()" class="style-btn !px-3">▶</button>
+                <button onclick="toggleMusicMenu()" id="trackDisplay" class="style-btn min-w-[85px]">Track I</button>
+                <div id="musicPop">
+                    <div class="p-3 text-[10px] text-sky-400 border-b border-white/5 cursor-pointer font-bold" onclick="setTrack(0)">Spiritual I</div>
+                    <div class="p-3 text-[10px] text-gray-500 border-b border-white/5 cursor-pointer font-bold" onclick="setTrack(1)">Spiritual II</div>
+                    <div class="p-3 text-[10px] text-gray-500 cursor-pointer font-bold" onclick="setTrack(2)">Spiritual III</div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <div class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
+                    <span id="inkCount">3</span>
+                </div>
+                <button onclick="toggleSkin()" class="style-btn">Preview</button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex items-center justify-center bg-black">
+            <div id="artFrame">
+                <div class="skin-overlay" id="sOverlay"></div>
+                <canvas id="tattooCanvas" width="1024" height="1024" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <footer class="p-4 bg-black/95 border-t border-white/10">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-2">
+                <button class="style-btn active" data-style="fineline">Fine Line</button>
+                <button class="style-btn" data-style="singlism">Singlism</button>
+                <button class="style-btn" data-style="blackwork">Blackwork</button>
+                <button class="style-btn" data-style="skulls">Skulls</button>
+                <button class="style-btn" data-style="disney">Disney</button>
+                <button class="style-btn" data-style="cyber">Cyber</button>
+                <button class="style-btn" data-style="tribal">Tribal</button>
+                <button class="style-btn" data-style="izumi">Izumi</button>
+                <button class="style-btn" data-style="neo trad">Neo Trad</button>
+                <button class="style-btn" data-style="japanese">Japanese</button>
+                <button class="style-btn" data-style="traditional">Trad</button>
+            </div>
+            <div class="flex flex-col gap-2">
+                <input type="text" id="promptInput" placeholder="DESCRIBE TATTOO CONCEPT" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[12px] text-white outline-none">
+                <button onclick="generate()" class="gen-btn">Generate Ink</button>
+            </div>
+        </footer>
+    </div>
+
+    <audio id="player" loop></audio>
+
+    <script>
+        let ink = 3;
+        let isPlaying = false;
+        let selectedStyle = 'fineline';
+        const playlist = [
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3",
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3",
+            "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3"
+        ];
+        const player = document.getElementById('player');
+        player.src = playlist[0];
+
+        function goStudio() { document.getElementById('homePage').style.display = 'none'; document.getElementById('studioPage').style.display = 'flex'; }
+        function goHome() { document.getElementById('homePage').style.display = 'flex'; document.getElementById('studioPage').style.display = 'none'; }
+        function openHelp() { document.getElementById('helpModal').style.display = 'flex'; }
+        function closeHelp() { document.getElementById('helpModal').style.display = 'none'; }
+        function closeSub() { document.getElementById('subOverlay').style.display = 'none'; }
+
+        function addInk(amt) {
+            ink += amt;
+            document.getElementById('inkCount').innerText = ink;
+            closeSub();
+        }
+
+        function toggleMusicMenu() { 
+            const m = document.getElementById('musicPop');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block'; 
+        }
+
+        function setTrack(idx) {
+            player.src = playlist[idx];
+            document.getElementById('trackDisplay').innerText = "Track " + (idx + 1);
+            if(isPlaying) player.play();
+            document.getElementById('musicPop').style.display = 'none';
+        }
+
+        function togglePlay() {
+            if(!isPlaying) { player.play(); document.getElementById('playBtn').innerText = "⏸"; }
+            else { player.pause(); document.getElementById('playBtn').innerText = "▶"; }
+            isPlaying = !isPlaying;
+        }
+
+        document.querySelectorAll('.skin-swatch').forEach(sw => {
+            sw.onclick = () => {
+                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+            };
+        });
+
+        function toggleSkin() { document.getElementById('artFrame').classList.toggle('preview-active'); }
+
+        document.querySelectorAll('[data-style]').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedStyle = btn.dataset.style;
+            };
+        });
+
+        function generate() {
+            if(ink <= 0) { document.getElementById('subOverlay').style.display = 'flex'; return; }
+            const p = document.getElementById('promptInput').value;
+            if(!p) return;
+            // API Logic would go here
+            ink--;
+            document.getElementById('inkCount').innerText = ink;
+        }
+    </script>
+</body>
+</html>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --ink-black: #050505; --stencil-blue: #38bdf8; --skin-tone: #f3d5b5; --gold: #f59e0b; }
