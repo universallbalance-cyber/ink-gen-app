@@ -721,7 +721,7 @@ function init() {
 
     try {
         // 5. Send request to backend
-        const response = await fetchWithRetry(`${BACKEND_URL}/generate`, {
+        const response = await fetchWithRetry('https://ink-gen-api-365969989524.us-central1.run.app', {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
