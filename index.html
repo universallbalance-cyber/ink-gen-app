@@ -441,6 +441,7 @@
         <!-- FOOTER CREDITS & PRIVACY -->
         <div class="mt-12 text-center">
             <div class="opacity-30 text-[8px] uppercase tracking-widest font-bold">By MICHAEL TAYLOR & UNIVERSALL BALANCE</div>
+			<a href="#" id="manualLink" class="privacy-link">Help Manual</a>
             <a href="privacy.html" class="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
         </div>
     </div>
@@ -556,6 +557,7 @@
         const notification = document.getElementById('notification');
         const subOverlay = document.getElementById('subOverlay');
         const inkVal = document.getElementById('inkVal');
+		const manualLink = document.getElementById('manualLink');
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
@@ -566,7 +568,11 @@
             { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
             { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
         ];
-
+	// Link the footer text to the modal
+	manualLink.onclick = (e) => {
+   	 e.preventDefault(); // Prevents the page from jumping/reloading
+   	 helpModal.style.display = 'flex'; 
+	};
 function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
@@ -832,10 +838,10 @@ async function saturate() {
         };
 
 		const helpModal = document.getElementById('helpModal');
-        const helpBtn = document.getElementById('helpBtn');
+        //const helpBtn = document.getElementById('helpBtn');
         const closeHelp = document.getElementById('closeHelp');
 
-        helpBtn.onclick = () => { helpModal.style.display = 'flex'; };
+        //helpBtn.onclick = () => { helpModal.style.display = 'flex'; };
         closeHelp.onclick = () => { helpModal.style.display = 'none'; };
 
         window.addEventListener('click', (e) => {
