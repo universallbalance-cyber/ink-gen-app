@@ -615,7 +615,7 @@ function init() {
                 } catch (err) { if (i === retries - 1) throw err; }
             }
         };
-		window.purchasePlan = purchasePlan; 
+
         document.getElementById('enterStudio').onclick = () => {
             homePage.style.display = 'none';
             studioPage.style.display = 'flex';
@@ -647,7 +647,7 @@ function init() {
         };
 
         window.onclick = () => document.getElementById('musicPop').classList.remove('show');
-
+		
         document.getElementById('playBtn').onclick = async () => {
             if(!isPlaying) {
                 try {
@@ -842,7 +842,7 @@ async function saturate() {
             if (e.target === helpModal) { helpModal.style.display = 'none'; }
         });
         init();
-		
+	window.purchasePlan = purchasePlan; 	
     </script>
 </body>
 </html>
