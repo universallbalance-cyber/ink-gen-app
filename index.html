@@ -699,69 +699,70 @@ function init() {
         };
 
   // 1. UPDATE THE GENERATE FUNCTION
-       async function generate() {
+async function generate() {
     // 1. Check credits
     if (credits <= 0) {
-        subOverlay.style.display = 'flex';
+        // Ensure subOverlay is defined or use getElementById
+        document.getElementById('subOverlay').style.display = 'flex';
         return;
     }
 
-    // 2. Get prompt
-    const p = promptInput.value.trim();
-    if (!p) return;
+    // 2. Get prompt and elements
+    const promptInput = document.getElementById('promptInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const loader = document.getElementById('loader');
+    const pVal = promptInput.value.trim();
+    
+    if (!pVal) {
+        alert("ENTER A DESIGN CONCEPT");
+        return;
+    }
 
-    // 3. UI lock + loader
+    // 3. UI lock
     loader.style.display = 'flex';
     generateBtn.disabled = true;
-    saturateBtn.style.display = 'none';
-
-    // 4. Build full prompt
-    const pVal = document.getElementById('promptInput').value;
-    const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
 
     try {
-        // 5. Send request to backend
-        const response = await fetchWithRetry('https://ink-gen-api-365969989524.us-central1.run.app', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                prompt: fullPrompt,
-                size: 1024
+        const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
+
+        // 4. Send request (Restored 'action' and used standard 'fetch')
+        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'generate', // Restored from working version
+                prompt: fullPrompt 
             })
         });
 
         const data = await response.json();
 
-        // 6. Validate response
-        if (!data || !data.predictions || !data.predictions[0].bytesBase64Encoded) {
-            throw new Error("Invalid API response");
+        // 5. Validate and Draw
+        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            const base64Data = data.predictions[0].bytesBase64Encoded;
+            const img = new Image();
+            
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // 6. Deduct credit only on success
+                credits -= 1;
+                updateInk(); // Ensure this function exists to update the UI
+                
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            };
+            img.src = `data:image/png;base64,${base64Data}`;
+        } else {
+            throw new Error("Generation failed");
         }
-
-        // 7. Convert base64 → image
-        const img = new Image();
-        img.src = "data:image/png;base64," + data.predictions[0].bytesBase64Encoded;
-
-        await new Promise(res => img.onload = res);
-
-        // 8. Draw on canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        // 9. Deduct credit
-        credits -= 1;
-        updateInk();
-
-        // 10. Show saturate button
-        saturateBtn.style.display = 'flex';
-
-    } catch (err) {
-        console.error(err);
-        showMessage("Generation failed. Try again.");
+    } catch (e) {
+        console.error(e);
+        alert("ENGINE OFFLINE. RETRYING...");
+        loader.style.display = 'none';
+        generateBtn.disabled = false;
     }
-
-    // 11. Restore UI
-    loader.style.display = 'none';
-    generateBtn.disabled = false;
 }
 // 2. UPDATE THE SATURATE (STENCIL) FUNCTION
 async function saturate() {
