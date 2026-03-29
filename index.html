@@ -568,7 +568,11 @@
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-		let credits = parseInt(localStorage.getItem('user_ink')) ?? 3;
+		let savedInk = localStorage.getItem('user_ink');
+		let credits = (savedInk && !isNaN(parseInt(savedInk))) ? parseInt(savedInk) : 3;
+
+// Immediately update the screen so it doesn't show NaN
+updateInk();
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
@@ -603,9 +607,14 @@ function init() {
 	    // Change 'inkCount' to 'inkVal' to match your HTML
 	    const element = document.getElementById('inkVal');
 	    if (element) {
-	        element.innerText = credits;
-	    }
-	
+        // --- ADDED THIS SAFETY CHECK ---
+        // If credits is broken (NaN), show 0. Otherwise show the number.
+        element.innerText = isNaN(credits) ? 0 : credits;
+    }
+
+    // Save it to the phone's permanent memory
+    localStorage.setItem('user_ink', credits);
+}
 	    // Save it to the phone's permanent memory
 	    localStorage.setItem('user_ink', credits);
 	}
