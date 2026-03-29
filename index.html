@@ -667,16 +667,20 @@ function checkDailyReplenish() {
     const today = new Date().toDateString();
     const lastRefillDate = localStorage.getItem('last_refill_date');
 
+    // Only run if the date has changed
     if (lastRefillDate !== today) {
-        // Only give them 3 if they are currently below 3. 
-        // This protects their "Paid Ink" (50) from being reset to 3!
+        
+        // --- THIS IS THE FIX ---
+        // Only give 3 ink if they are currently BELOW 3.
+        // If they have 2, it refills them to 3.
+        // If they have 0, it refills them to 3.
+        // If they have 50 (paid), it does NOTHING so they keep their 50.
         if (credits < 3) {
             credits = 3;
         }
         
         localStorage.setItem('last_refill_date', today);
         updateInk();
-        alert("Daily Refill: Your 3 daily Inks are ready!");
     }
 }
         document.getElementById('enterStudio').onclick = () => {
