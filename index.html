@@ -566,9 +566,7 @@
         const inkVal = document.getElementById('inkVal');
 		const manualLink = document.getElementById('manualLink');
 
-        let selectedStyle = 'fineline';
-        let isPlaying = false;
-		// --- DAILY CREDIT SYSTEM ---
+				// --- DAILY CREDIT SYSTEM ---
 
 const today = new Date().toLocaleDateString();
 const lastDay = localStorage.getItem("inkGen_last_day");
@@ -588,6 +586,9 @@ function updateInk() {
     inkVal.textContent = credits;
     localStorage.setItem("inkGen_credits", credits);
 }
+
+        let selectedStyle = 'fineline';
+        let isPlaying = false;
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
