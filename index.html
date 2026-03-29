@@ -599,14 +599,18 @@ function init() {
         console.log("Audio bypass active.");
     }
 }
-		function updateInk() {
-		    // 1. Update the screen so the user sees it
-		    document.getElementById('inkCount').innerText = credits;
-		
-		    // 2. Save it to the phone's permanent memory
-		    localStorage.setItem('user_ink', credits);
-		}
-	window.purchasePlan = async function(amt, sku) {
+	function updateInk() {
+    // Use 'inkVal' to match your HTML ID
+    const element = document.getElementById('inkVal');
+    if (element) {
+        element.innerText = isNaN(credits) ? 0 : credits;
+    }
+    // Save to memory once
+    localStorage.setItem('user_ink', credits);
+}
+
+window.purchasePlan = async function(amt, sku) {
+    // ... rest of your purchase code
     try {
         // 1. Setup the Google Play "sku" (Product ID)
         const methodData = [{ 
