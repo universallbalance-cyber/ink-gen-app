@@ -568,7 +568,7 @@
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-	let credits = 3; 
+		let credits = parseInt(localStorage.getItem('user_ink')) ?? 3;
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
@@ -593,16 +593,21 @@ function init() {
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
             player.src = playlist[0].url;
-	    updateInk();
+
         }
     } catch (e) {
         console.log("Audio bypass active.");
     }
 }
-        function updateInk() {
-            inkVal.textContent = credits;
-        }
-	window.purchasePlan = async function(amt, sku) {
+function updateInk() {
+    const element = document.getElementById('inkVal');
+    if (element) {
+        element.innerText = isNaN(credits) ? 0 : credits;
+    }
+    localStorage.setItem('user_ink', credits);
+}
+
+window.purchasePlan = async function(amt, sku) {
     try {
         // 1. Setup the Google Play "sku" (Product ID)
         const methodData = [{ 
@@ -656,7 +661,20 @@ function init() {
                 } catch (err) { if (i === retries - 1) throw err; }
             }
         };
+function checkDailyReplenish() {
+    const today = new Date().toDateString();
+    const lastRefillDate = localStorage.getItem('last_refill_date');
 
+    if (lastRefillDate !== today) {
+        // ONLY refill if they are below 3. 
+        // This stops it from resetting a '0' to a '3' UNLESS it's actually a new day.
+        if (credits < 3) {
+            credits = 3;
+        }
+        localStorage.setItem('last_refill_date', today);
+        updateInk();
+    }
+}
         document.getElementById('enterStudio').onclick = () => {
             homePage.style.display = 'none';
             studioPage.style.display = 'flex';
@@ -882,9 +900,17 @@ async function saturate() {
         window.addEventListener('click', (e) => {
             if (e.target === helpModal) { helpModal.style.display = 'none'; }
         });
-        init();
+	// 1. Setup the canvas and audio
+	init();
+	
+	// 2. Make the purchase function available to the buttons
 	window.purchasePlan = purchasePlan; 	
+	
+	// 3. Check if we need to give them the "Daily 3" first
+	checkDailyReplenish();
+	
+	// 4. NOW update the screen with the final correct number
+	updateInk();
     </script>
 </body>
 </html>
-
