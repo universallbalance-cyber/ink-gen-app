@@ -566,29 +566,9 @@
         const inkVal = document.getElementById('inkVal');
 		const manualLink = document.getElementById('manualLink');
 
-				// --- DAILY CREDIT SYSTEM ---
-
-const today = new Date().toLocaleDateString();
-const lastDay = localStorage.getItem("inkGen_last_day");
-
-// If it's a new day, reset credits to 3
-if (lastDay !== today) {
-    localStorage.setItem("inkGen_last_day", today);
-    localStorage.setItem("inkGen_credits", 3);
-}
-
-// Load saved credits or default to 3
-let savedCredits = localStorage.getItem("inkGen_credits");
-let credits = savedCredits ? parseInt(savedCredits) : 3;
-
-// Update UI + persist to storage
-function updateInk() {
-    inkVal.textContent = credits;
-    localStorage.setItem("inkGen_credits", credits);
-}
-
         let selectedStyle = 'fineline';
         let isPlaying = false;
+	let credits = 3; 
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
