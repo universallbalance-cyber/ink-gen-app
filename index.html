@@ -736,16 +736,17 @@ async function generate() {
         const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
 
         // 4. Send request (Restored 'action' and used standard 'fetch')
-        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'generate', // Restored from working version
-                prompt: fullPrompt 
-            })
-        });
+const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        action: 'generate',
+        prompt: fullPrompt 
+    })
+});
 
-        const data = await response.json();
+const data = await response.json();
+console.log("BACKEND RESPONSE:", data);
 
         // 5. Validate and Draw
         if (data.predictions && data.predictions[0].bytesBase64Encoded) {
