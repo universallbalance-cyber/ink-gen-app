@@ -369,6 +369,10 @@
         <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
         
         <div class="w-full max-w-[300px]">
+	<button onclick="purchasePlan(3, 'daily_3_subscription')" class="sub-btn featured">    
+	<span>3 Daily Refills (Sub)</span>
+    	<span class="text-sky-400">$4.99/mo</span>
+	</button>
             <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
                 <span>Fun Plan (50 Tattoos)</span>
                 <span class="text-sky-400">$19.99</span>
@@ -426,6 +430,10 @@
 
             <div class="border-t border-white/5 pt-6">
                 <h3 class="header-font text-[8px] tracking-widest opacity-30 uppercase mb-3">Subscription Plans</h3>
+		<button onclick="purchasePlan(3, 'daily_3_subscription')" class="sub-btn featured">
+    		    <span>3 Daily Refills (Sub)</span>
+                    <span class="text-sky-400">$4.99/mo</span>
+                </button>
                 <button onclick="purchasePlan(50, 'Fun Plan')" class="sub-btn">
                     <span>Fun Plan (50)</span>
                     <span class="text-sky-400">$19.99</span>
@@ -564,23 +572,55 @@
         const notification = document.getElementById('notification');
         const subOverlay = document.getElementById('subOverlay');
         const inkVal = document.getElementById('inkVal');
-		const manualLink = document.getElementById('manualLink');
+	const manualLink = document.getElementById('manualLink');
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-	let credits = 3; 
+	
+        // 1. Declare the variable without a default number
+let credits; 
+
+// 2. This function decides if the user gets 3 or 0 based on their status
+function handleCreditsOnStartup() {
+    const teaserUsed = localStorage.getItem('teaser_used');
+    const hasDailySub = localStorage.getItem('has_daily_3_sub') === 'true';
+    const savedInk = localStorage.getItem('user_ink');
+
+    // FIRST TIME EVER: Give them the 3-ink teaser
+    if (!teaserUsed) {
+        credits = 3;
+        localStorage.setItem('teaser_used', 'true');
+        localStorage.setItem('user_ink', 3);
+    } 
+    // SUBSCRIBER: Give them 3 if it's a new day
+    else if (hasDailySub) {
+        const today = new Date().toDateString();
+        const lastRefill = localStorage.getItem('last_sub_refill_date');
+
+        if (lastRefill !== today) {
+            credits = 3;
+            localStorage.setItem('last_sub_refill_date', today);
+            localStorage.setItem('user_ink', 3);
+        } else {
+            credits = savedInk ? parseInt(savedInk) : 0;
+        }
+    } 
+    // STANDARD USER: Load whatever they had left (usually 0)
+    else {
+        credits = savedInk ? parseInt(savedInk) : 0;
+    }
+    
+    updateInk();
+}
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
             { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
             { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
         ];
-	// Link the footer text to the modal
-	manualLink.onclick = (e) => {
-   	 e.preventDefault(); // Prevents the page from jumping/reloading
-   	 helpModal.style.display = 'flex'; 
-	};
-function init() {
+
+
+   function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
     canvas.height = 1024;
@@ -589,11 +629,13 @@ function init() {
     ctx.fillStyle = "white"; 
     ctx.fillRect(0,0,1024,1024);
 
+    // --- NEW LOGIC: This triggers the teaser or subscription check ---
+    handleCreditsOnStartup();
+
     // Audio safe-load (keeps Start Session button working)
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
             player.src = playlist[0].url;
-	    updateInk();
         }
     } catch (e) {
         console.log("Audio bypass active.");
@@ -601,6 +643,7 @@ function init() {
 }
         function updateInk() {
             inkVal.textContent = credits;
+	    localStorage.setItem('user_ink', credits);
         }
 	window.purchasePlan = async function(amt, sku) {
     try {
@@ -625,17 +668,27 @@ function init() {
         await response.complete('success');
 
         // --- SUCCESS: ADD CREDITS ---
-        credits += amt;
-        updateInk();
-        
-        alert(`INK RESTOCKED: +${amt}`);
-        document.getElementById('subOverlay').style.display = 'none';
+	// --- SUCCESS: CHECK WHICH PLAN WAS BOUGHT ---
+        if (sku === 'daily_3_subscription') {
+            // Mark them as a subscriber in the phone's memory
+            localStorage.setItem('has_daily_3_sub', 'true');
+            localStorage.setItem('last_sub_refill_date', new Date().toDateString());
+            credits = 3; 
+            alert("DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
+        } else {
+            // Standard one-time credit top-up
+            credits += amt;
+            alert(`INK RESTOCKED: +${amt}`);
+        }
 
+        updateInk();
+
+        document.getElementById('subOverlay').style.display = 'none';
     } catch (e) {
-        // Triggers if the user cancels or if there is a network error
         console.error("Billing Error:", e);
     }
 };
+
         const showMessage = (text) => {
             notification.textContent = text;
             notification.style.display = 'block';
@@ -882,6 +935,12 @@ async function saturate() {
         window.addEventListener('click', (e) => {
             if (e.target === helpModal) { helpModal.style.display = 'none'; }
         });
+
+	// Link the footer text to the modal
+	manualLink.onclick = (e) => {
+   	 e.preventDefault(); // Prevents the page from jumping/reloading
+   	 helpModal.style.display = 'flex'; 
+	};
         init();
 	window.purchasePlan = purchasePlan; 	
     </script>
