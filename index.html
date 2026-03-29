@@ -530,160 +530,361 @@
 	<audio id="player" loop></audio>
 
     <script type="module">
-    const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
-    const homePage = document.getElementById('homePage');
-    const studioPage = document.getElementById('studioPage');
-    const canvas = document.getElementById('tattooCanvas');
-    const ctx = canvas.getContext('2d');
-    const artFrame = document.getElementById('artFrame');
+   // --- CENTRAL SETTINGS ---
+  //  const CONFIG = {
+   // MAX_FREE_LIMIT: 5,
+     // Encrypted version of your password
+    //  ENCRYPTED_PASS: "SUdQLUdvUHJvMQ==" 
+    //    };
+		// --- AUTO-RESET COUNTER EVERY DAY ---
+	//(function() {
+    //const today = new Date().toLocaleDateString(); // Gets current date (e.g., "2/12/2026")
+    //const lastUseDate = localStorage.getItem('inkGen_last_date');
+
+    //if (lastUseDate !== today) {
+        // It's a brand new day!
+     //   localStorage.setItem('inkGen_usage', '0');
+     //   localStorage.setItem('inkGen_pro_unlocked', 'false'); // Reset Pro status
+     //   localStorage.setItem('inkGen_last_date', today);
+     //   console.log("Daily limit and Pro status reset for a new day.");
+//    }
+//})();
+	const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
+        const homePage = document.getElementById('homePage');
+        const studioPage = document.getElementById('studioPage');
+        const canvas = document.getElementById('tattooCanvas');
+        const ctx = canvas.getContext('2d');
+        const artFrame = document.getElementById('artFrame');
+        const promptInput = document.getElementById('promptInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const saturateBtn = document.getElementById('saturateBtn');
+        const loader = document.getElementById('loader');
+        const player = document.getElementById('player');
+        const skinOverlay = document.getElementById('skinOverlay');
+        const notification = document.getElementById('notification');
+        const subOverlay = document.getElementById('subOverlay');
+        const inkVal = document.getElementById('inkVal');
+		const manualLink = document.getElementById('manualLink');
+
+        let selectedStyle = 'fineline';
+        let isPlaying = false;
+	let credits = 3; 
+        
+        const playlist = [
+            { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
+            { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
+            { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
+        ];
+	// Link the footer text to the modal
+	manualLink.onclick = (e) => {
+   	 e.preventDefault(); // Prevents the page from jumping/reloading
+   	 helpModal.style.display = 'flex'; 
+	};
+function init() {
+    // Set canvas dimensions
+    canvas.width = 1024; 
+    canvas.height = 1024;
+    
+    // Fill with pure white (Blank Canvas)
+    ctx.fillStyle = "white"; 
+    ctx.fillRect(0,0,1024,1024);
+
+    // Audio safe-load (keeps Start Session button working)
+    try {
+        if (typeof playlist !== 'undefined' && playlist.length > 0) {
+            player.src = playlist[0].url;
+	    updateInk();
+        }
+    } catch (e) {
+        console.log("Audio bypass active.");
+    }
+}
+        function updateInk() {
+            inkVal.textContent = credits;
+        }
+	window.purchasePlan = async function(amt, sku) {
+    try {
+        // 1. Setup the Google Play "sku" (Product ID)
+        const methodData = [{ 
+            supportedMethods: 'https://play.google.com/billing', 
+            data: { sku: sku } 
+        }];
+
+        // 2. Initialize the request object
+        const request = new PaymentRequest(methodData, { 
+            total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
+        });
+
+        // 3. Trigger the Google Play bottom-sheet (Waits for the user)
+        const response = await request.show();
+
+        // 4. Extract the purchase token (Used for tracking/verification)
+        const { purchaseToken } = response.details;
+
+        // 5. Tell Google Play the purchase is "Complete" (Prevents auto-refunds)
+        await response.complete('success');
+
+        // --- SUCCESS: ADD CREDITS ---
+        credits += amt;
+        updateInk();
+        
+        alert(`INK RESTOCKED: +${amt}`);
+        document.getElementById('subOverlay').style.display = 'none';
+
+    } catch (e) {
+        // Triggers if the user cancels or if there is a network error
+        console.error("Billing Error:", e);
+    }
+};
+        const showMessage = (text) => {
+            notification.textContent = text;
+            notification.style.display = 'block';
+            setTimeout(() => { notification.style.display = 'none'; }, 5000);
+        };
+
+        const fetchWithRetry = async (url, options, retries = 5) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return response;
+                    if (response.status === 429 || response.status >= 500) {
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                    throw new Error(`API Error: ${response.status}`);
+                } catch (err) { if (i === retries - 1) throw err; }
+            }
+        };
+
+        document.getElementById('enterStudio').onclick = () => {
+            homePage.style.display = 'none';
+            studioPage.style.display = 'flex';
+            init();
+        };
+
+        document.getElementById('goHome').onclick = () => {
+            homePage.style.display = 'flex';
+            studioPage.style.display = 'none';
+        };
+
+        document.querySelectorAll('.skin-swatch').forEach(sw => {
+            sw.onclick = () => {
+                document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                const col = sw.dataset.color;
+                document.documentElement.style.setProperty('--skin-tone', col);
+            };
+        });
+
+        document.getElementById('skinTog').onclick = function() {
+            const active = artFrame.classList.toggle('preview-active');
+            this.classList.toggle('active', active);
+        };
+
+        document.getElementById('musicMenu').onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('musicPop').classList.toggle('show');
+        };
+
+        window.onclick = () => document.getElementById('musicPop').classList.remove('show');
+		
+        document.getElementById('playBtn').onclick = async () => {
+            if(!isPlaying) {
+                try {
+                    await player.play(); isPlaying = true;
+                    document.getElementById('p-ico').innerText = '||';
+                } catch(e) { console.error("Audio blocked"); }
+            } else {
+                player.pause(); isPlaying = false;
+                document.getElementById('p-ico').innerText = '▶';
+            }
+        };
+
+        document.querySelectorAll('.track-item').forEach(item => {
+            item.onclick = () => {
+                const idx = item.dataset.idx;
+                player.src = playlist[idx].url;
+                document.getElementById('trackName').innerText = playlist[idx].name;
+                document.querySelectorAll('.track-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if(isPlaying) player.play();
+            };
+        });
+
+        document.querySelectorAll('.style-btn[data-style]').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.style-btn[data-style]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedStyle = btn.dataset.style;
+            };
+        });
+
+        const getStylePrompt = (style) => {
+            const map = {
+                fineline: "Fine line tattoo, single needle, black ink, minimalist, isolated on white background.",
+                singlism: "Singlism style tattoo, continuous single line art, clean high-fashion aesthetic, black ink on white background.",
+                blackwork: "Bold blackwork tattoo, solid black ink, high contrast, isolated on white background.",
+                tribal: "Symmetrical tribal tattoo, sharp black graphic, isolated on white background.",
+                izumi: "Izumi tattoo style, traditional Japanese aesthetic with a modern flow, black ink etching, white background.",
+                skulls: "Dark gothic skull tattoo, anatomical detail, high-contrast black and grey, isolated on white background.",
+                blackwork: "Bold blackwork tattoo, solid black ink, high contrast, isolated on white background.",
+                neo: "Neo-traditional tattoo, bold outlines, varied line weights, illustrative black ink on white background.",
+                disney: "Disney character style tattoo art, smooth curves, playful illustrative lines, black ink on white background.",
+                japanese: "Irezumi japanese tattoo style, flowing lines, black ink, white background.",
+                cyber: "Cyber sigilism tattoo, futuristic sharp biometric lines, black ink on white background.",
+                traditional: "Old school american traditional tattoo, bold black outlines, white background.",
+                micro: "Micro realism tattoo, extremely small scale detail, etched lines, white background."
+            };
+            return map[style] || map.fineline;
+        };
+
+  // 1. UPDATE THE GENERATE FUNCTION
+async function generate() {
+    // 1. Check credits
+    if (credits <= 0) {
+        // Ensure subOverlay is defined or use getElementById
+        document.getElementById('subOverlay').style.display = 'flex';
+        return;
+    }
+
+    // 2. Get prompt and elements
     const promptInput = document.getElementById('promptInput');
     const generateBtn = document.getElementById('generateBtn');
     const loader = document.getElementById('loader');
-    const player = document.getElementById('player');
-    const skinOverlay = document.getElementById('skinOverlay');
-    const notification = document.getElementById('notification');
-    const subOverlay = document.getElementById('subOverlay');
-    const inkVal = document.getElementById('inkVal');
-    const manualLink = document.getElementById('manualLink');
-
-    let selectedStyle = 'fineline';
-    let isPlaying = false;
+    const pVal = promptInput.value.trim();
     
-    // --- BULLETPROOF INITIALIZATION ---
-    let savedInk = localStorage.getItem('user_ink');
-    let credits = (savedInk !== null && !isNaN(parseInt(savedInk))) ? parseInt(savedInk) : 3;
-
-    const playlist = [
-        { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
-        { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
-        { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
-    ];
-
-    function init() {
-        canvas.width = 1024; 
-        canvas.height = 1024;
-        ctx.fillStyle = "white"; 
-        ctx.fillRect(0,0,1024,1024);
-        try {
-            if (playlist.length > 0) player.src = playlist[0].url;
-        } catch (e) { console.log("Audio bypass active."); }
+    if (!pVal) {
+        alert("ENTER A DESIGN CONCEPT");
+        return;
     }
 
-    // --- FIXED UPDATEINK (Removed the extra brackets) ---
-    function updateInk() {
-        const element = document.getElementById('inkVal');
-        if (element) {
-            element.innerText = isNaN(credits) ? 0 : credits;
+    // 3. UI lock
+    loader.style.display = 'flex';
+    generateBtn.disabled = true;
+
+    try {
+        const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
+
+        // 4. Send request (Restored 'action' and used standard 'fetch')
+        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'generate', // Restored from working version
+                prompt: fullPrompt 
+            })
+        });
+
+        const data = await response.json();
+
+        // 5. Validate and Draw
+        if (data.predictions && data.predictions[0].bytesBase64Encoded) {
+            const base64Data = data.predictions[0].bytesBase64Encoded;
+            const img = new Image();
+            
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // 6. Deduct credit only on success
+                credits -= 1;
+                updateInk(); // Ensure this function exists to update the UI
+                
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            };
+            img.src = `data:image/png;base64,${base64Data}`;
+        } else {
+            throw new Error("Generation failed");
         }
-        localStorage.setItem('user_ink', credits);
+    } catch (e) {
+        console.error(e);
+        alert("ENGINE OFFLINE. RETRYING...");
+        loader.style.display = 'none';
+        generateBtn.disabled = false;
     }
+}
+// 2. UPDATE THE SATURATE (STENCIL) FUNCTION
+async function saturate() {
+    loader.style.display = 'flex';
+    saturateBtn.disabled = true;
 
-    window.purchasePlan = async function(amt, sku) {
-        try {
-            const methodData = [{ 
-                supportedMethods: 'https://play.google.com/billing', 
-                data: { sku: sku } 
-            }];
-            const request = new PaymentRequest(methodData, { 
-                total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
-            });
-            const response = await request.show();
-            await response.complete('success');
+    try {
+        // 1. Get the base64 PNG from the canvas
+        const b64 = canvas.toDataURL('image/png').split(',')[1];
 
-            credits += amt;
-            updateInk();
-            alert(`INK RESTOCKED: +${amt}`);
-            document.getElementById('subOverlay').style.display = 'none';
-        } catch (e) {
-            console.error("Billing Error:", e);
-        }
-    };
+        // 2. Call your backend
+        const response = await fetch(BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'saturate',
+                image: b64
+            })
+        });
 
-    function checkDailyReplenish() {
-        const today = new Date().toDateString();
-        const lastRefillDate = localStorage.getItem('last_refill_date');
-        if (lastRefillDate !== today) {
-            if (credits < 3) credits = 3;
-            localStorage.setItem('last_refill_date', today);
-            updateInk();
-        }
-    }
+        const data = await response.json();
 
-    // --- BUTTON CLICKS (Now they will work!) ---
-    document.getElementById('enterStudio').onclick = () => {
-        homePage.style.display = 'none';
-        studioPage.style.display = 'flex';
-        init();
-    };
+        // 3. SDXL returns a URL, not base64
+        const imgUrl = data.output[0];
 
-    document.getElementById('goHome').onclick = () => {
-        homePage.style.display = 'flex';
-        studioPage.style.display = 'none';
-    };
+        // 4. Fetch the image and convert to blob
+        const imgResp = await fetch(imgUrl);
+        const blob = await imgResp.blob();
 
-    manualLink.onclick = (e) => {
-        e.preventDefault();
-        document.getElementById('helpModal').style.display = 'flex'; 
-    };
+        // 5. Convert blob → base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64 = reader.result;
 
-    document.getElementById('closeHelp').onclick = () => {
-        document.getElementById('helpModal').style.display = 'none';
-    };
-
-    // --- REST OF THE LOGIC ---
-    document.querySelectorAll('.skin-swatch').forEach(sw => {
-        sw.onclick = () => {
-            document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
-            sw.classList.add('active');
-            document.documentElement.style.setProperty('--skin-tone', sw.dataset.color);
+            // 6. Draw onto canvas
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                loader.style.display = 'none';
+                saturateBtn.disabled = false;
+            };
+            img.src = base64;
         };
-    });
+        reader.readAsDataURL(blob);
 
-    document.getElementById('skinTog').onclick = function() {
-        artFrame.classList.toggle('preview-active');
-    };
+    } catch (err) {
+        console.error("Color Fetch Error:", err);
+        loader.style.display = 'none';
+        saturateBtn.disabled = false;
+    }
+}
 
-    document.getElementById('generateBtn').onclick = async function generate() {
-        if (credits <= 0) {
-            document.getElementById('subOverlay').style.display = 'flex';
-            return;
-        }
-        const pVal = promptInput.value.trim();
-        if (!pVal) { alert("ENTER A DESIGN CONCEPT"); return; }
+        generateBtn.onclick = generate;
+        //saturateBtn.onclick = saturate;
+        
+        artFrame.onclick = () => document.body.classList.add('focus-mode');
+        document.getElementById('exitFocus').onclick = (e) => { 
+            e.stopPropagation(); 
+            document.body.classList.remove('focus-mode'); 
+        };
 
-        loader.style.display = 'flex';
-        this.disabled = true;
+        document.getElementById('dlBtn').onclick = () => {
+            const l = document.createElement('a');
+            l.download = `ink-${Date.now()}.png`; l.href = canvas.toDataURL(); l.click();
+        };
 
-        try {
-            const response = await fetch(BACKEND_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'generate', prompt: pVal })
-            });
-            const data = await response.json();
-            if (data.predictions) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    credits -= 1;
-                    updateInk();
-                    loader.style.display = 'none';
-                    this.disabled = false;
-                };
-                img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-            }
-        } catch (e) {
-            alert("ENGINE OFFLINE");
-            loader.style.display = 'none';
-            this.disabled = false;
-        }
-    };
+		const helpModal = document.getElementById('helpModal');
+        //const helpBtn = document.getElementById('helpBtn');
+        const closeHelp = document.getElementById('closeHelp');
 
-    // --- START THE ENGINE ---
-    init();
-    checkDailyReplenish();
-    updateInk();
-</script>
+        //helpBtn.onclick = () => { helpModal.style.display = 'flex'; };
+        closeHelp.onclick = () => { helpModal.style.display = 'none'; };
+
+        window.addEventListener('click', (e) => {
+            if (e.target === helpModal) { helpModal.style.display = 'none'; }
+        });
+        init();
+	window.purchasePlan = purchasePlan; 	
+    </script>
 </body>
 </html>
 
