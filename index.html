@@ -593,7 +593,7 @@ function init() {
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
             player.src = playlist[0].url;
-	    updateInk();
+
         }
     } catch (e) {
         console.log("Audio bypass active.");
@@ -904,10 +904,17 @@ async function saturate() {
         window.addEventListener('click', (e) => {
             if (e.target === helpModal) { helpModal.style.display = 'none'; }
         });
-        init();
+	// 1. Setup the canvas and audio
+	init();
+	
+	// 2. Make the purchase function available to the buttons
 	window.purchasePlan = purchasePlan; 	
-  // Run this immediately when the app opens
-checkDailyReplenish();
+	
+	// 3. Check if we need to give them the "Daily 3" first
+	checkDailyReplenish();
+	
+	// 4. NOW update the screen with the final correct number
+	updateInk();
     </script>
 </body>
 </html>
