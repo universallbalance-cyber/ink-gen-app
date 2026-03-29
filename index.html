@@ -568,7 +568,7 @@
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-		let credits = parseInt(localStorage.getItem('user_ink')) || 3;
+		let credits = parseInt(localStorage.getItem('user_ink')) ?? 3;
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
@@ -667,18 +667,12 @@ function checkDailyReplenish() {
     const today = new Date().toDateString();
     const lastRefillDate = localStorage.getItem('last_refill_date');
 
-    // Only run if the date has changed
     if (lastRefillDate !== today) {
-        
-        // --- THIS IS THE FIX ---
-        // Only give 3 ink if they are currently BELOW 3.
-        // If they have 2, it refills them to 3.
-        // If they have 0, it refills them to 3.
-        // If they have 50 (paid), it does NOTHING so they keep their 50.
+        // ONLY refill if they are below 3. 
+        // This stops it from resetting a '0' to a '3' UNLESS it's actually a new day.
         if (credits < 3) {
             credits = 3;
         }
-        
         localStorage.setItem('last_refill_date', today);
         updateInk();
     }
