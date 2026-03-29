@@ -568,7 +568,7 @@
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-		let credits = parseInt(localStorage.getItem('user_ink')) || 3;
+		let credits = (savedInk !== null && !isNaN(parseInt(savedInk))) ? parseInt(savedInk) : 3;
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
