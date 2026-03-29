@@ -369,15 +369,15 @@
         <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
         
         <div class="w-full max-w-[300px]">
-            <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
+            <button onclick="purchasePlan(50, 'Fun Plan')" class="sub-btn">
                 <span>Fun Plan (50 Tattoos)</span>
                 <span class="text-sky-400">$19.99</span>
             </button>
-            <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
+            <button onclick="purchasePlan(100, 'The Artist')" class="sub-btn featured">
                 <span>The Artist (100 Tattoos)</span>
                 <span class="text-sky-400">$49.99</span>
             </button>
-            <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
+            <button onclick="purchasePlan(200, 'Tattoo Master')" class="sub-btn">
                 <span>Tattoo Master (200 Tattoos)</span>
                 <span class="text-sky-400">$99.99</span>
             </button>
@@ -568,7 +568,7 @@
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-		let credits = (savedInk !== null && !isNaN(parseInt(savedInk))) ? parseInt(savedInk) : 3;
+	let credits = 3; 
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
@@ -599,18 +599,10 @@ function init() {
         console.log("Audio bypass active.");
     }
 }
-	function updateInk() {
-    // Use 'inkVal' to match your HTML ID
-    const element = document.getElementById('inkVal');
-    if (element) {
-        element.innerText = isNaN(credits) ? 0 : credits;
-    }
-    // Save to memory once
-    localStorage.setItem('user_ink', credits);
-}
-
-window.purchasePlan = async function(amt, sku) {
-    // ... rest of your purchase code
+        function updateInk() {
+            inkVal.textContent = credits;
+        }
+	window.purchasePlan = async function(amt, sku) {
     try {
         // 1. Setup the Google Play "sku" (Product ID)
         const methodData = [{ 
@@ -664,26 +656,7 @@ window.purchasePlan = async function(amt, sku) {
                 } catch (err) { if (i === retries - 1) throw err; }
             }
         };
-function checkDailyReplenish() {
-    // 1. Get today's date as a simple string (e.g., "Sat Mar 28 2026")
-    const today = new Date().toDateString();
-    
-    // 2. Look in memory for the last time we did this
-    const lastRefillDate = localStorage.getItem('last_refill_date');
 
-    // 3. If the dates don't match, it's a new day!
-    if (lastRefillDate !== today) {
-        credits = 3; // Reset their starting ink to 3
-        
-        // 4. Save the new date so this doesn't happen again until tomorrow
-        localStorage.setItem('last_refill_date', today);
-        
-        // 5. Update the screen and save the credits
-        updateInk();
-        
-        alert("Daily Refill: You have 3 fresh Ink!");
-    }
-}
         document.getElementById('enterStudio').onclick = () => {
             homePage.style.display = 'none';
             studioPage.style.display = 'flex';
@@ -911,8 +884,6 @@ async function saturate() {
         });
         init();
 	window.purchasePlan = purchasePlan; 	
-  // Run this immediately when the app opens
-checkDailyReplenish();
     </script>
 </body>
 </html>
