@@ -599,13 +599,16 @@ function init() {
         console.log("Audio bypass active.");
     }
 }
-		function updateInk() {
-		    // 1. Update the screen so the user sees it
-		    document.getElementById('inkCount').innerText = credits;
-		
-		    // 2. Save it to the phone's permanent memory
-		    localStorage.setItem('user_ink', credits);
-		}
+	function updateInk() {
+	    // Change 'inkCount' to 'inkVal' to match your HTML
+	    const element = document.getElementById('inkVal');
+	    if (element) {
+	        element.innerText = credits;
+	    }
+	
+	    // Save it to the phone's permanent memory
+	    localStorage.setItem('user_ink', credits);
+	}
 	window.purchasePlan = async function(amt, sku) {
     try {
         // 1. Setup the Google Play "sku" (Product ID)
@@ -661,23 +664,19 @@ function init() {
             }
         };
 function checkDailyReplenish() {
-    // 1. Get today's date as a simple string (e.g., "Sat Mar 28 2026")
     const today = new Date().toDateString();
-    
-    // 2. Look in memory for the last time we did this
     const lastRefillDate = localStorage.getItem('last_refill_date');
 
-    // 3. If the dates don't match, it's a new day!
     if (lastRefillDate !== today) {
-        credits = 3; // Reset their starting ink to 3
+        // Only give them 3 if they are currently below 3. 
+        // This protects their "Paid Ink" (50) from being reset to 3!
+        if (credits < 3) {
+            credits = 3;
+        }
         
-        // 4. Save the new date so this doesn't happen again until tomorrow
         localStorage.setItem('last_refill_date', today);
-        
-        // 5. Update the screen and save the credits
         updateInk();
-        
-        alert("Daily Refill: You have 3 fresh Ink!");
+        alert("Daily Refill: Your 3 daily Inks are ready!");
     }
 }
         document.getElementById('enterStudio').onclick = () => {
