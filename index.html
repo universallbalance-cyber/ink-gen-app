@@ -596,13 +596,14 @@ function handleCreditsOnStartup() {
     else if (hasDailySub) {
         const today = new Date().toDateString();
         const lastRefill = localStorage.getItem('last_sub_refill_date');
-
+		let currentInk = parseInt(localStorage.getItem('user_ink')) || 0;
         if (lastRefill !== today) {
-            credits = 3;
-            localStorage.setItem('last_sub_refill_date', today);
-            localStorage.setItem('user_ink', 3);
+		credits = currentInk + 3;         
+        localStorage.setItem('last_sub_refill_date', today);
+        localStorage.setItem('user_ink', credits);
+		showAppMsg("DAILY REFILL", "Your 3 daily inks have arrived!");
         } else {
-            credits = savedInk ? parseInt(savedInk) : 0;
+            credits = currentInk;
         }
     } 
     // STANDARD USER: Load whatever they had left (usually 0)
@@ -805,7 +806,7 @@ async function generate() {
     const pVal = promptInput.value.trim();
     
     if (!pVal) {
-        alert("ENTER A DESIGN CONCEPT");
+        showAppMsg("INPUT NEEDED", "Please enter a design concept to continue.");
         return;
     }
 
@@ -850,7 +851,7 @@ async function generate() {
         }
     } catch (e) {
         console.error(e);
-        alert("ENGINE OFFLINE. RETRYING...");
+        showAppMsg("CONNECTION ERROR", "Engine offline. Retrying...", true);
         loader.style.display = 'none';
         generateBtn.disabled = false;
     }
