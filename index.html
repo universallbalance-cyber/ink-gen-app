@@ -689,11 +689,9 @@ function handleCreditsOnStartup() {
         document.getElementById('subOverlay').style.display = 'none';
 
     } catch (e) {
-        console.error("Billing Error:", e);
-        // If it was already working for one-time items, this alert will 
-        // tell us if the Subscription specifically is failing.
-        alert("Billing could not be completed.");
-    }
+    console.error("Billing Error:", e);
+    alert("Error Detail: " + e.message); // This will tell us if it's "Item Unavailable" or "Developer Error"
+}
 };
 
         const showMessage = (text) => {
