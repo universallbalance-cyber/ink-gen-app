@@ -647,39 +647,32 @@ function handleCreditsOnStartup() {
         }
 	window.purchasePlan = async function(amt, sku) {
     try {
-        // 1. Setup the Google Play "sku" AND "type"
-        // If it's the subscription SKU, we must label it as 'subs'
+        // 1. We must use the Product ID 'ink_plans' for Google to find it
+        // But we keep the logic for your specific daily-3-subscription
+        const playStoreID = (sku === 'daily-3-subscription') ? 'ink_plans' : sku;
         const productType = (sku === 'daily-3-subscription') ? 'subs' : 'inapp';
 
         const methodData = [{ 
             supportedMethods: 'https://play.google.com/billing', 
             data: { 
-                sku: sku,
-                type: productType // This tells Google to look in the Subscriptions list
+                sku: playStoreID, // Send 'ink_plans' to Google
+                type: productType 
             } 
         }];
 
-        // 2. Initialize the request object
         const request = new PaymentRequest(methodData, { 
             total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
         });
 
-        // 3. Trigger the Google Play bottom-sheet
         const response = await request.show();
-
-        // 4. Extract the purchase token
-        const { purchaseToken } = response.details;
-
-        // 5. Tell Google Play the purchase is "Complete"
         await response.complete('success');
 
-        // --- SUCCESS: CHECK WHICH PLAN WAS BOUGHT ---
-        // Fixed: Using hyphens to match your Console/HTML
+        // --- SUCCESS LOGIC ---
         if (sku === 'daily-3-subscription') {
             localStorage.setItem('has_daily_3_sub', 'true');
             localStorage.setItem('last_sub_refill_date', new Date().toDateString());
             credits = 3; 
-            alert("DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
+            alert("DAILY REFILL ACTIVATED!");
         } else {
             credits += amt;
             alert(`INK RESTOCKED: +${amt}`);
@@ -689,11 +682,10 @@ function handleCreditsOnStartup() {
         document.getElementById('subOverlay').style.display = 'none';
 
     } catch (e) {
-    console.error("Billing Error:", e);
-    alert("Error Detail: " + e.message); // This will tell us if it's "Item Unavailable" or "Developer Error"
-}
+        console.error("Billing Error:", e);
+        alert("Error Detail: " + e.message); 
+    }
 };
-
         const showMessage = (text) => {
             notification.textContent = text;
             notification.style.display = 'block';
