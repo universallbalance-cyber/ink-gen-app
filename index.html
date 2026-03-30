@@ -647,10 +647,16 @@ function handleCreditsOnStartup() {
         }
 	window.purchasePlan = async function(amt, sku) {
     try {
-        // 1. Setup the Google Play "sku" (Product ID)
+        // 1. Setup the Google Play "sku" AND "type"
+        // If it's the subscription SKU, we must label it as 'subs'
+        const productType = (sku === 'daily-3-subscription') ? 'subs' : 'inapp';
+
         const methodData = [{ 
             supportedMethods: 'https://play.google.com/billing', 
-            data: { sku: sku } 
+            data: { 
+                sku: sku,
+                type: productType // This tells Google to look in the Subscriptions list
+            } 
         }];
 
         // 2. Initialize the request object
@@ -658,34 +664,35 @@ function handleCreditsOnStartup() {
             total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
         });
 
-        // 3. Trigger the Google Play bottom-sheet (Waits for the user)
+        // 3. Trigger the Google Play bottom-sheet
         const response = await request.show();
 
-        // 4. Extract the purchase token (Used for tracking/verification)
+        // 4. Extract the purchase token
         const { purchaseToken } = response.details;
 
-        // 5. Tell Google Play the purchase is "Complete" (Prevents auto-refunds)
+        // 5. Tell Google Play the purchase is "Complete"
         await response.complete('success');
 
-        // --- SUCCESS: ADD CREDITS ---
-	// --- SUCCESS: CHECK WHICH PLAN WAS BOUGHT ---
-        if (sku === 'daily_3_subscription') {
-            // Mark them as a subscriber in the phone's memory
+        // --- SUCCESS: CHECK WHICH PLAN WAS BOUGHT ---
+        // Fixed: Using hyphens to match your Console/HTML
+        if (sku === 'daily-3-subscription') {
             localStorage.setItem('has_daily_3_sub', 'true');
             localStorage.setItem('last_sub_refill_date', new Date().toDateString());
             credits = 3; 
             alert("DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
         } else {
-            // Standard one-time credit top-up
             credits += amt;
             alert(`INK RESTOCKED: +${amt}`);
         }
 
         updateInk();
-
         document.getElementById('subOverlay').style.display = 'none';
+
     } catch (e) {
         console.error("Billing Error:", e);
+        // If it was already working for one-time items, this alert will 
+        // tell us if the Subscription specifically is failing.
+        alert("Billing could not be completed.");
     }
 };
 
