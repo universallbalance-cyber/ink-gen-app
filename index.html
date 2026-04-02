@@ -668,24 +668,24 @@ function handleCreditsOnStartup() {
         const response = await request.show();
         await response.complete('success');
 
-        // --- SUCCESS LOGIC ---
+// --- SUCCESS LOGIC ---
         if (sku === 'daily-3-subscription') {
             localStorage.setItem('has_daily_3_sub', 'true');
             localStorage.setItem('last_sub_refill_date', new Date().toDateString());
-            credits = 3; 
+            credits += 3; // Add 3 immediately upon subscribing
             showAppMsg("Success", "DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
         } else {
             credits += amt;
             showAppMsg("Success", "INK RESTOCKED!");
         }
-
-        updateInk();
+        // Keep these here once, and remove the copies from inside the if/else above
+        updateInk(); 
         document.getElementById('subOverlay').style.display = 'none';
 
-    } catch (e) {
-        console.error("Billing Error:", e);
-        showAppMsg("Billing Error", e.message, true);
-    }
+} catch (e) {
+    console.error("Billing Error:", e);
+    showAppMsg("Billing Error", e.message, true);
+}
 };
         const showMessage = (text) => {
             notification.textContent = text;
