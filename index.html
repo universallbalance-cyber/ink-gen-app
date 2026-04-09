@@ -133,7 +133,7 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #94a3b8;
+            color: #FFFFFF;
             white-space: nowrap;
             flex-shrink: 0;
             transition: 0.2s;
@@ -215,13 +215,13 @@
         }
 		.privacy-link {
             font-family: 'Orbitron', sans-serif;
-            color: #fff; /* Lightened from #444 for better visibility */
+            color: #FFFFFF; /* Lightened from #444 for better visibility */
             text-decoration: none !important;
             font-size: 14px;
             font-weight: 900;
             letter-spacing: 2px;
 			text-transform: uppercase;
-            opacity: 0.3; /* Increased from 0.5 for better visibility */
+            opacity: 0.6; /* Increased from 0.5 for better visibility */
             transition: all 0.3s;
             margin-top: 8px;
             display: inline-block;
@@ -466,9 +466,12 @@
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
 
         <header class="studio-header">
-            <button id="goHome" class="p-1 opacity-30">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="5"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
+			
+			<button id="goHome" class="p-2">
+			    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+			        <path d="m15 18-6-6 6-6"/>
+			    </svg>
+			</button>
 
             <div class="flex items-center gap-1 relative">
                 <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
