@@ -173,8 +173,8 @@
         #artFrame {
             background: white;
             position: relative;
-            width: min(85vw, 100vh);
-            height: min(85vw, 100vh);
+            width: min(85vw, 60vh);
+            height: min(85vw, 60vh);
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
@@ -369,6 +369,10 @@
         <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
         
         <div class="w-full max-w-[300px]">
+	<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">    
+	<span>3 Daily Refills (Sub)</span>
+    	<span class="text-sky-400">$4.99/mo</span>
+	</button>
             <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
                 <span>Fun Plan (50 Tattoos)</span>
                 <span class="text-sky-400">$19.99</span>
@@ -426,15 +430,19 @@
 
             <div class="border-t border-white/5 pt-6">
                 <h3 class="header-font text-[8px] tracking-widest opacity-30 uppercase mb-3">Subscription Plans</h3>
-                <button onclick="purchasePlan(50, 'Fun Plan')" class="sub-btn">
+		<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">
+    		    <span>3 Daily Refills (Sub)</span>
+                    <span class="text-sky-400">$4.99/mo</span>
+                </button>
+                <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
                     <span>Fun Plan (50)</span>
                     <span class="text-sky-400">$19.99</span>
                 </button>
-                <button onclick="purchasePlan(100, 'The Artist')" class="sub-btn featured">
+                <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
                     <span>The Artist (100)</span>
                     <span class="text-sky-400">$49.99</span>
                 </button>
-                <button onclick="purchasePlan(200, 'Tattoo Master')" class="sub-btn">
+                <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
                     <span>Tattoo Master (200)</span>
                     <span class="text-sky-400">$99.99</span>
                 </button>
@@ -564,23 +572,56 @@
         const notification = document.getElementById('notification');
         const subOverlay = document.getElementById('subOverlay');
         const inkVal = document.getElementById('inkVal');
-		const manualLink = document.getElementById('manualLink');
+	const manualLink = document.getElementById('manualLink');
 
         let selectedStyle = 'fineline';
         let isPlaying = false;
-	let credits = 3; 
+	
+        // 1. Declare the variable without a default number
+let credits; 
+
+// 2. This function decides if the user gets 3 or 0 based on their status
+function handleCreditsOnStartup() {
+    const teaserUsed = localStorage.getItem('teaser_used');
+    const hasDailySub = localStorage.getItem('has_daily_3_sub') === 'true';
+    const savedInk = localStorage.getItem('user_ink');
+
+    // FIRST TIME EVER: Give them the 3-ink teaser
+    if (!teaserUsed) {
+        credits = 3;
+        localStorage.setItem('teaser_used', 'true');
+        localStorage.setItem('user_ink', 3);
+    } 
+    // SUBSCRIBER: Give them 3 if it's a new day
+    else if (hasDailySub) {
+        const today = new Date().toDateString();
+        const lastRefill = localStorage.getItem('last_sub_refill_date');
+		let currentInk = parseInt(localStorage.getItem('user_ink')) || 0;
+        if (lastRefill !== today) {
+		credits = currentInk + 3;         
+        localStorage.setItem('last_sub_refill_date', today);
+        localStorage.setItem('user_ink', credits);
+		showAppMsg("DAILY REFILL", "Your 3 daily inks have arrived!");
+        } else {
+            credits = currentInk;
+        }
+    } 
+    // STANDARD USER: Load whatever they had left (usually 0)
+    else {
+        credits = savedInk ? parseInt(savedInk) : 0;
+    }
+    
+    updateInk();
+}
         
         const playlist = [
             { name: "Track I", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_1-A85M802pl8svjrLd.mp3" },
             { name: "Track II", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_2-YyvD1V0LMOTeDz76.mp3" },
             { name: "Track III", url: "https://assets.zyrosite.com/dOq4ypO8x6fPq8OL/spiritual_3-Aq2GPVJQn1fjKLKo.mp3" }
         ];
-	// Link the footer text to the modal
-	manualLink.onclick = (e) => {
-   	 e.preventDefault(); // Prevents the page from jumping/reloading
-   	 helpModal.style.display = 'flex'; 
-	};
-function init() {
+
+
+   function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
     canvas.height = 1024;
@@ -589,11 +630,13 @@ function init() {
     ctx.fillStyle = "white"; 
     ctx.fillRect(0,0,1024,1024);
 
+    // --- NEW LOGIC: This triggers the teaser or subscription check ---
+    handleCreditsOnStartup();
+
     // Audio safe-load (keeps Start Session button working)
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
             player.src = playlist[0].url;
-	    updateInk();
         }
     } catch (e) {
         console.log("Audio bypass active.");
@@ -601,40 +644,48 @@ function init() {
 }
         function updateInk() {
             inkVal.textContent = credits;
+	    localStorage.setItem('user_ink', credits);
         }
 	window.purchasePlan = async function(amt, sku) {
     try {
-        // 1. Setup the Google Play "sku" (Product ID)
+        // 1. We must use the Product ID 'ink_plans' for Google to find it
+        // But we keep the logic for your specific daily-3-subscription
+        const playStoreID = (sku === 'daily-3-subscription') ? 'ink_plans' : sku;
+        const productType = (sku === 'daily-3-subscription') ? 'subs' : 'inapp';
+
         const methodData = [{ 
             supportedMethods: 'https://play.google.com/billing', 
-            data: { sku: sku } 
+            data: { 
+                sku: playStoreID, // Send 'ink_plans' to Google
+                type: productType 
+            } 
         }];
 
-        // 2. Initialize the request object
         const request = new PaymentRequest(methodData, { 
             total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
         });
 
-        // 3. Trigger the Google Play bottom-sheet (Waits for the user)
         const response = await request.show();
-
-        // 4. Extract the purchase token (Used for tracking/verification)
-        const { purchaseToken } = response.details;
-
-        // 5. Tell Google Play the purchase is "Complete" (Prevents auto-refunds)
         await response.complete('success');
 
-        // --- SUCCESS: ADD CREDITS ---
-        credits += amt;
-        updateInk();
-        
-        alert(`INK RESTOCKED: +${amt}`);
+// --- SUCCESS LOGIC ---
+        if (sku === 'daily-3-subscription') {
+            localStorage.setItem('has_daily_3_sub', 'true');
+            localStorage.setItem('last_sub_refill_date', new Date().toDateString());
+            credits += 3; // Add 3 immediately upon subscribing
+            showAppMsg("Success", "DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
+        } else {
+            credits += amt;
+            showAppMsg("Success", "INK RESTOCKED!");
+        }
+        // Keep these here once, and remove the copies from inside the if/else above
+        updateInk(); 
         document.getElementById('subOverlay').style.display = 'none';
 
-    } catch (e) {
-        // Triggers if the user cancels or if there is a network error
-        console.error("Billing Error:", e);
-    }
+} catch (e) {
+    console.error("Billing Error:", e);
+    showAppMsg("Billing Error", e.message, true);
+}
 };
         const showMessage = (text) => {
             notification.textContent = text;
@@ -755,7 +806,7 @@ async function generate() {
     const pVal = promptInput.value.trim();
     
     if (!pVal) {
-        alert("ENTER A DESIGN CONCEPT");
+        showAppMsg("INPUT NEEDED", "Please enter a design concept to continue.");
         return;
     }
 
@@ -800,7 +851,7 @@ async function generate() {
         }
     } catch (e) {
         console.error(e);
-        alert("ENGINE OFFLINE. RETRYING...");
+        showAppMsg("CONNECTION ERROR", "Engine offline. Retrying...", true);
         loader.style.display = 'none';
         generateBtn.disabled = false;
     }
@@ -882,8 +933,51 @@ async function saturate() {
         window.addEventListener('click', (e) => {
             if (e.target === helpModal) { helpModal.style.display = 'none'; }
         });
+
+	// Link the footer text to the modal
+	manualLink.onclick = (e) => {
+   	 e.preventDefault(); // Prevents the page from jumping/reloading
+   	 helpModal.style.display = 'flex'; 
+	};
         init();
 	window.purchasePlan = purchasePlan; 	
+	// 2. THE INSTRUCTIONS (Add this inside your <script> tags)
+window.showAppMsg = function(title, message, isError = false) {
+    const modal = document.getElementById('appModal');
+    const titleEl = document.getElementById('modalTitle');
+    const iconEl = document.getElementById('modalIcon');
+    
+    titleEl.innerText = title;
+    document.getElementById('modalBody').innerText = message;
+    
+    if (isError) {
+        titleEl.style.color = "#ff4d4d"; 
+        iconEl.innerText = "⚠️";
+        modal.children[0].style.borderColor = "#ff4d4d";
+    } else {
+        titleEl.style.color = "#00d4ff"; 
+        iconEl.innerText = "✨";
+        modal.children[0].style.borderColor = "#00d4ff";
+    }
+    modal.style.display = 'flex';
+};
+
+window.closeModal = function() {
+    document.getElementById('appModal').style.display = 'none';
+};
     </script>
+	<div id="appModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div style="background:#1a1a1a; color:white; padding:30px; border-radius:20px; width:85%; max-width:350px; text-align:center; border:2px solid #00d4ff; box-shadow: 0 0 25px rgba(0,212,255,0.3); font-family: sans-serif;">
+        
+        <div id="modalIcon" style="font-size: 40px; margin-bottom: 15px;">✨</div>
+        <h2 id="modalTitle" style="margin:0 0 10px 0; color:#00d4ff; text-transform: uppercase; letter-spacing: 2px;">SUCCESS</h2>
+        
+        <p id="modalBody" style="font-size:16px; line-height:1.5; margin-bottom: 25px; color: #ccc;"></p>
+        
+        <button onclick="closeModal()" style="background:#00d4ff; color:#000; border:none; padding:12px 0; border-radius:10px; font-weight:bold; font-size:16px; cursor:pointer; width:100%; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            GOT IT
+        </button>
+    </div>
+</div>
 </body>
 </html>
