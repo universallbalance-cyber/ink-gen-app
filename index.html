@@ -159,28 +159,29 @@
 
 
         /* CANVAS AREA */
-	.canvas-container {
-	    flex: 1;
-	    display: flex;
-	    justify-content: center;
-	    align-items: flex-start;
-	    padding-top: 12vh; /* pulls the canvas down toward the bottom buttons */
-	    background: #000;
-	}
+		.canvas-container {
+		    flex: 1;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: flex-start; /* pushes the box UP */
+		    align-items: center;
+		    padding-top: 2vh; /* tiny spacing so it doesn’t touch the header */
+		    background: #000;
+		}
 
 
 		#artFrame {
-			width: 92vw;
-			height: 92vw;
-			max-width: 92vw;
-			max-height: 92vw;
-			background: white;
-			position: relative;
-			border-radius: 4px;
-			overflow: hidden;
-			box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-			transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+		    width: 95vw;        /* bigger on all Android devices */
+		    height: 95vw;       /* keeps it a perfect square */
+		    max-width: 500px;   /* optional: prevents it from getting too huge on tablets */
+		    max-height: 500px;
+		    background: white;
+		    position: relative;
+		    border-radius: 4px;
+		    overflow: hidden;
+		    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
 		}
+
 
         body.focus-mode #artFrame {
             width: 100vw;
