@@ -107,15 +107,36 @@
             position: relative;
         }
 
-		.studio-header {
-		    padding: 0.5rem 0.75rem;
-		    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-		    background: rgba(5, 5, 5, 0.9);
-		    display: flex;
-		    justify-content: center;   /* <-- CENTER EVERYTHING */
-		    align-items: center;
-		    gap: 0.5rem;                /* <-- keeps buttons spaced nicely */
-		}
+.studio-header {
+    position: relative;
+    height: 48px;
+    display: flex;
+    justify-content: center; /* center the middle group */
+    align-items: center;
+    padding: 0 0.75rem;
+    background: rgba(5, 5, 5, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Left group pinned left */
+.header-left {
+    position: absolute;
+    left: 0.75rem;
+}
+
+/* Right group pinned right */
+.header-right {
+    position: absolute;
+    right: 0.75rem;
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* Center group stays centered */
+.header-center {
+    display: flex;
+    gap: 0.25rem;
+}
 
         .studio-footer {
             padding: 0.75rem;
@@ -510,36 +531,31 @@
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
 
         <header class="studio-header">
-            <button id="goHome" class="p-1 opacity-30">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
+    <button id="goHome" class="header-left">
+        <svg width="18" height="18" ...></svg>
+    </button>
 
-            <div class="flex items-center gap-1 relative">
-                <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
-                    <span id="p-ico">▶</span>
-                </button>
-                <button id="musicMenu" class="style-btn !rounded-l-none min-w-[70px] text-left flex justify-between items-center gap-2">
-                    <span id="trackName">Track I</span>
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                <div id="musicPop" class="music-pop">
-                    <div class="track-item active" data-idx="0">Spiritual I</div>
-                    <div class="track-item" data-idx="1">Spiritual II</div>
-                    <div class="track-item" data-idx="2">Spiritual III</div>
-                </div>
-            </div>
-            <div class="flex gap-1 items-center">
-                <div class="credit-badge">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
-                    <span id="inkVal">3</span>
-                </div>
-            <div class="flex gap-1">
-                <button id="skinTog" class="style-btn">Skin Preview</button>
-                <button id="dlBtn" class="style-btn !bg-white/10 !border-none">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                </button>
-            </div>
-        </header>
+    <div class="header-center">
+        <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
+            <span id="p-ico">▶</span>
+        </button>
+        <button id="musicMenu" class="style-btn !rounded-l-none min-w-[70px]">
+            <span id="trackName">Track I</span>
+            <svg width="8" height="8" ...></svg>
+        </button>
+    </div>
+
+    <div class="header-right">
+        <div class="credit-badge">
+            <svg width="8" height="8" ...></svg>
+            <span id="inkVal">3</span>
+        </div>
+        <button id="skinTog" class="style-btn">Skin Preview</button>
+        <button id="dlBtn" class="style-btn !bg-white/10 !border-none">
+            <svg width="12" height="12" ...></svg>
+        </button>
+    </div>
+</header>
 
         <div class="canvas-container">
             <div id="artFrame">
