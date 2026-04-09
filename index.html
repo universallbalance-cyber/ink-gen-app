@@ -109,7 +109,7 @@
         }
 
         .studio-header {
-            padding: 0.4rem 1.25rem;
+            padding: 4px 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             background: rgba(5, 5, 5, 0.9);
             display: flex;
@@ -159,22 +159,22 @@
 
 
         /* CANVAS AREA */
-        .canvas-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            background: #000;
-            overflow: hidden;
-            position: relative;
-        }
+		.canvas-container {
+		    flex: 1;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    padding: 2px; /* Reduces the forced black buffer to almost nothing */
+		    background: #000;
+		    overflow: hidden;
+		    position: relative;
+		}
 
         #artFrame {
             background: white;
             position: relative;
-            width: min(95vw, 75vh);
-            height: min(95vw, 75vh);
+            width: min(95vw, 72vh);
+            height: min(95vw, 72vh);
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
@@ -468,7 +468,7 @@
     <div id="studioPage">
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
 
-        <header class="studio-header px6">
+        <header class="studio-header !px-4 !py-1">
 			
 			<button id="goHome" class="p-2">
 			    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
