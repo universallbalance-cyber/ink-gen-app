@@ -144,6 +144,25 @@
             color: black;
             border-color: var(--stencil-blue);
         }
+		/* Safely enlarge ONLY the top header buttons */
+		.studio-header .style-btn {
+		    font-size: 10px;      /* was 8px */
+		    font-weight: 900;     /* stronger */
+		    padding-left: 0.8rem; /* horizontal only */
+		    padding-right: 0.8rem;
+		}
+		/* Safely enlarge goHome without changing header height */
+		.studio-header #goHome {
+		    padding-left: 0.6rem;
+		    padding-right: 0.6rem;
+		    opacity: 0.6;
+		}
+		
+		.studio-header #goHome svg {
+		    width: 18px;
+		    height: 18px;
+		    stroke-width: 3;
+		}
         .credit-badge {
             background: rgba(245, 158, 11, 0.1);
             border: 1px solid rgba(245, 158, 11, 0.3);
