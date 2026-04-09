@@ -99,106 +99,85 @@
         .sub-btn.featured { border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); }
 
 
-        /* STUDIO PAGE */
-        #studioPage { 
-            display: none; 
-            flex-direction: column;
-            height: 100dvh; 
-            width: 100vw;
-            position: relative;
-        }
+      /* STUDIO PAGE CONTAINER */
+#studioPage { 
+    display: none; 
+    flex-direction: column;
+    height: 100dvh; 
+    width: 100vw;
+    position: relative;
+}
 
-        .studio-header {
-            padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(5, 5, 5, 0.9);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-			/* Make ONLY the top header buttons brighter + bigger */
-			.studio-header .style-btn {
-			    font-size: 11px;
-			    font-weight: 900;
-			    padding: 0.45rem 0.85rem;
-			    color: #ffffff;
-			    border: none !important;
+/* HEADER AREA - Background set to transparent */
+.studio-header {
+    padding: 0.5rem 0.75rem;
+    border-bottom: none; /* Removed border */
+    background: transparent; /* No background */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-			}
-		/* --- BRIGHTER + BIGGER CREDIT BADGE --- */
-	.studio-header .credit-badge {
-	    background: rgba(255, 255, 255, 0.15);   /* brighter pill */
-	    border: 1px solid rgba(255, 255, 255, 0.6); /* brighter border */
-	    color: #ffffff;                          /* bright text */
-	    font-size: 12px;                         /* slightly bigger */
-	    font-weight: 900;                        /* bold */
-	    padding: 0.35rem 0.6rem;                 /* bigger pill */
-	    border-radius: 999px;                    /* round shape */
-	    display: flex;
-	    align-items: center;
-	    gap: 0.25rem;
-	}
+/* CONSOLIDATED STUDIO BUTTONS - Transparent background */
+.style-btn {
+    background: transparent; /* Removed background */
+    border: none !important; /* Removed border */
+    padding: 0.45rem 0.85rem;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff; /* Keeping it Bright White */
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
 
-/* brighten the lightning icon */
-.studio-header .credit-badge svg {
+.style-btn.active {
+    background: var(--stencil-blue); /* Active state still needs a background to show it is selected */
+    color: black;
+}
+
+/* BRIGHTER + BOLDER CREDIT BADGE - THE ONLY ONE WITH A BACKGROUND */
+.credit-badge {
+    background: rgba(255, 255, 255, 0.15); 
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.credit-badge svg {
     stroke: #ffffff;
     opacity: 1;
 }
-		/* Make the goHome button match the header buttons */
-.studio-header #goHome {
-    font-size: 11px;
-    font-weight: 900;
-    padding: 0.45rem 0.85rem;
-    color: #ffffff;
-    background: rgba(255,255,255,0.1);
+
+/* BACK BUTTON - Background removed */
+#goHome {
+    background: transparent; /* Removed background */
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* brighten the arrow icon */
-.studio-header #goHome svg {
+#goHome svg {
     stroke: #ffffff;
     opacity: 1;
 }
-		
-        .studio-footer {
-            padding: 0.75rem;
-            padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.75rem);
-            background: rgba(5, 5, 5, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
 
-        .style-btn {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.4rem 0.75rem;
-            font-size: 8px; 
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
-            white-space: nowrap;
-            flex-shrink: 0;
-            transition: 0.2s;
-        }
-
-        .style-btn.active {
-            background: var(--stencil-blue);
-            color: black;
-            border-color: var(--stencil-blue);
-        }
-        .credit-badge {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--gold);
-            padding: 0.4rem 0.6rem;
-            border-radius: 6px;
-            font-size: 8px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+/* FOOTER AREA - Background set to transparent */
+.studio-footer {
+    padding: 0.75rem;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.75rem);
+    background: transparent; /* No background */
+    border-top: none; /* Removed border */
+}
 
 
         /* CANVAS AREA */
@@ -508,11 +487,12 @@
     <div id="studioPage">
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
 
-        <header class="studio-header">
-            <button id="goHome" class="p-1 opacity-100">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-
+		<header class="studio-header">
+		    <button id="goHome" class="style-btn">
+		        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+		            <path d="m15 18-6-6 6-6"/>
+		        </svg>
+		    </button>
             <div class="flex items-center gap-1 relative">
                 <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
                     <span id="p-ico">▶</span>
@@ -534,9 +514,13 @@
                 </div>
             <div class="flex gap-1">
                 <button id="skinTog" class="style-btn">Skin Preview</button>
-                <button id="dlBtn" class="style-btn !bg-white/10 !border-none">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                </button>
+			<button id="dlBtn" class="style-btn">
+			    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+			        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/>
+			        <polyline points="7 10 12 15 17 10"/>
+			        <line x1="12" x2="12" y1="15" y2="3"/>
+			    </svg>
+			</button>
             </div>
         </header>
 
