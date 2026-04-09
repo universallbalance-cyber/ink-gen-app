@@ -116,7 +116,33 @@
             justify-content: space-between;
             align-items: center;
         }
+			/* Make ONLY the top header buttons brighter + bigger */
+			.studio-header .style-btn {
+			    font-size: 11px;
+			    font-weight: 900;
+			    padding: 0.45rem 0.85rem;
+			    color: #ffffff;
+			    border-color: rgba(255,255,255,0.6);
+			}
+		/* --- BRIGHTER + BIGGER CREDIT BADGE --- */
+	.studio-header .credit-badge {
+	    background: rgba(255, 255, 255, 0.15);   /* brighter pill */
+	    border: 1px solid rgba(255, 255, 255, 0.6); /* brighter border */
+	    color: #ffffff;                          /* bright text */
+	    font-size: 12px;                         /* slightly bigger */
+	    font-weight: 900;                        /* bold */
+	    padding: 0.35rem 0.6rem;                 /* bigger pill */
+	    border-radius: 999px;                    /* round shape */
+	    display: flex;
+	    align-items: center;
+	    gap: 0.25rem;
+	}
 
+/* brighten the lightning icon */
+.studio-header .credit-badge svg {
+    stroke: #ffffff;
+    opacity: 0.9;
+}
         .studio-footer {
             padding: 0.75rem;
             padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.75rem);
@@ -173,8 +199,8 @@
         #artFrame {
             background: white;
             position: relative;
-            width: min(85vw, 60vh);
-            height: min(85vw, 60vh);
+            width: min(85vw, 100vh);
+            height: min(85vw, 100vh);
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
@@ -217,8 +243,8 @@
             font-family: 'Orbitron', sans-serif;
             color: #666; /* Lightened from #444 for better visibility */
             text-decoration: none !important;
-            font-size: 7px;
-            font-weight: 700;
+            font-size: 9px;
+            font-weight: 900;
             letter-spacing: 2px;
 			text-transform: uppercase;
             opacity: 0.7; /* Increased from 0.5 for better visibility */
@@ -452,7 +478,7 @@
         
         <!-- FOOTER CREDITS & PRIVACY -->
 <div class="mt-12 text-center">
-    <div class="opacity-30 text-[8px] uppercase tracking-widest font-bold mb-4">
+    <div class="opacity-60 text-[10px] uppercase tracking-widest font-bold mb-4">
         By MICHAEL TAYLOR & UNIVERSALL BALANCE
     </div>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
