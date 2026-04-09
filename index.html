@@ -146,6 +146,9 @@
         }
 		/* Safely enlarge ONLY the top header buttons */
 		.studio-header .style-btn {
+		color: white;
+    	border-color: rgba(255,255,255,0.4);
+    	background: rgba(255,255,255,0.12);
 		    font-size: 10px;      /* was 8px */
 		    font-weight: 900;     /* stronger */
 		    padding-left: 0.8rem; /* horizontal only */
@@ -153,14 +156,18 @@
 		}
 		/* Safely enlarge goHome without changing header height */
 		.studio-header #goHome {
-		    padding-left: 0.6rem;
-		    padding-right: 0.6rem;
-		    opacity: 0.6;
+			background: rgba(255,255,255,0.12);
+    		border: 1px solid rgba(255,255,255,0.4);
+    		padding-left: 0.6rem;
+    		padding-right: 0.6rem;
+    		border-radius: 6px;
+    		opacity: 0.9; /* more visible */
 		}
 		
 		.studio-header #goHome svg {
 		    width: 18px;
 		    height: 18px;
+		    stroke: white;       /* make the arrow white */
 		    stroke-width: 3;
 		}
         .credit-badge {
