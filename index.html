@@ -162,25 +162,23 @@
 		.canvas-container {
 		    flex: 1;
 		    display: flex;
-		    align-items: center;
+		    align-items: flex-start;
 		    justify-content: center;
-		    padding: 0 !important; /* Remove ALL padding around the box */
+		    padding: 0 !important;
 		    background: #000;
 		}
 
 		#artFrame {
-		    background: white;
-		    position: relative;
-		    /* Force the box to be exactly 70% of the total screen height */
-		    width: 70vh; 
-		    height: 70vh;
-		    /* Ensure it never gets wider than the phone screen itself */
-		    max-width: 92vw;
-		    max-height: 92vw;
-		    border-radius: 4px;
-		    overflow: hidden;
-		    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-		    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+			width: 92vw;
+			height: 92vw;
+			max-width: 92vw;
+			max-height: 92vw;
+			background: white;
+			position: relative;
+			border-radius: 4px;
+			overflow: hidden;
+			box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+			transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 		}
 
         body.focus-mode #artFrame {
