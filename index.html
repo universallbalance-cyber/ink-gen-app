@@ -115,19 +115,20 @@
     padding-top: 12px;
     padding-bottom: 12px;
     /* This ensures the items never touch the absolute edge */
-    padding-left: 20px !important; 
-    padding-right: 20px !important; 
+    padding-left: 15px !important; 
+    padding-right: 15px !important; 
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+	box-sizing: border-box !important; /* Critical: keeps padding inside the 100% width */
 }
 
 /* CONSOLIDATED STUDIO BUTTONS - Transparent background */
 .style-btn {
     background: transparent; /* Removed background */
     border: none !important; /* Removed border */
-    padding: 0.45rem 0.85rem;
+    padding: 0.45rem 0.4rem;
     font-size: 11px;
     font-weight: 900;
     text-transform: uppercase;
