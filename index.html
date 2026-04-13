@@ -287,29 +287,31 @@
             justify-content: center;
         }
 
-        .music-pop {
-            position: absolute;
-            top: 110%;
-            right: 0;
-            background: #0a0a0a;
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 140px;
-            border-radius: 8px;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(-5px);
-            transition: 0.2s;
-            z-index: 100;
-        }
+		    .music-pop {
+		    position: absolute;
+		    top: 100%; /* Changed from 110% */
+		    right: 0;
+		    background: #0a0a0a;
+		    border: 1px solid rgba(255,255,255,0.2); /* Slightly brighter border */
+		    width: 160px; /* Widened slightly */
+		    border-radius: 8px;
+		    opacity: 0;
+		    pointer-events: none;
+		    transform: translateY(5px);
+		    transition: 0.2s;
+		    z-index: 2000; /* High z-index to stay above the canvas */
+		    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+		}
         .music-pop.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        .track-item { 
-            padding: 0.6rem 0.8rem; 
-            font-size: 9px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            color: #475569;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
+		.track-item { 
+		    padding: 0.8rem 1rem; 
+		    font-size: 10px; 
+		    font-weight: 700; 
+		    text-transform: uppercase; 
+		    color: #ffffff; /* Changed from #475569 for better visibility */
+		    border-bottom: 1px solid rgba(255,255,255,0.05);
+		    cursor: pointer;
+		}
         .track-item.active { color: var(--stencil-blue); }
 
         .skin-swatch {
@@ -493,7 +495,7 @@
     <div id="studioPage">
         <button id="exitFocus" class="header-font">EXIT VIEW</button>
 
-		<header class="studio-header !px-6 w-full max-w-[100vw] overflow-hidden">
+		<header class="studio-header !px-6 w-full max-w-[100vw]">
 		<button id="goHome" class="style-btn">
 		    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 		        <path d="m15 18-6-6 6-6"/>
