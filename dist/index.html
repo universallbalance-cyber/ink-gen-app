@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  	<link rel="icon" type="image/png" href="data:image/png;base64,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" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/assets/favicon-fcc65c22.svg" />
+	<link rel="shortcut icon" href="/assets/favicon-f6800525.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-38ca0fde.png" />
+	<link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJJbmsgR2VuIFBybyIsDQogICJzaG9ydF9uYW1lIjogIklua0dlblBybyIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogIndlYi1hcHAtbWFuaWZlc3QtMTkyeDE5Mi5wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiLA0KICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwNCiAgICAgICJwdXJwb3NlIjogIm1hc2thYmxlIg0KICAgIH0sDQogICAgew0KICAgICAgInNyYyI6ICJ3ZWItYXBwLW1hbmlmZXN0LTUxMng1MTIucG5nIiwNCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwNCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsDQogICAgICAicHVycG9zZSI6ICJtYXNrYWJsZSINCiAgICB9DQogIF0sDQogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwNCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsDQogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiDQp9DQo=" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>INK-GEN PRO | Professional Tattoo Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #050505;
+            --stencil-blue: #38bdf8;
+            --skin-tone: #f3d5b5;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            scrollbar-width: none;
+        }
+        ::-webkit-scrollbar { display: none; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--ink-black);
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        .header-font { font-family: 'Orbitron', sans-serif; }
+
+        /* SCROLLABLE HOME */
+        #homePage { 
+            display: flex; 
+            flex-direction: column;
+            height: 100dvh; 
+            overflow-y: auto; 
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .home-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+.sub-btn {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-top: 0.75rem;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        
+        /* Subscription Button Hover/Active Lights */
+        .sub-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .sub-btn.featured:hover {
+            border-color: var(--stencil-blue);
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .sub-btn:active { transform: scale(0.97); opacity: 0.8; }
+        .sub-btn.featured { border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); }
+
+
+      /* STUDIO PAGE CONTAINER */
+	#studioPage { 
+    display: none; 
+    flex-direction: column;
+    height: 100dvh; 
+    width: 100vw;
+    position: relative;
+}
+
+/* HEADER AREA - Background set to transparent */
+.studio-header {
+    background: transparent !important;
+    border: none !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    /* This ensures the items never touch the absolute edge */
+    padding-left: 15px !important; 
+    padding-right: 15px !important; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+	box-sizing: border-box !important; /* Critical: keeps padding inside the 100% width */
+}
+
+/* CONSOLIDATED STUDIO BUTTONS - Transparent background */
+.style-btn {
+    background: transparent; /* Removed background */
+    border: none !important; /* Removed border */
+    padding: 0.45rem 0.4rem;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff; /* Keeping it Bright White */
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+
+.style-btn.active {
+    background: var(--stencil-blue); /* Active state still needs a background to show it is selected */
+    color: black;
+}
+
+/* BRIGHTER + BOLDER CREDIT BADGE - THE ONLY ONE WITH A BACKGROUND */
+.credit-badge {
+    background: rgba(255, 255, 255, 0.15); 
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.credit-badge svg {
+    stroke: #ffffff;
+    opacity: 1;
+}
+
+/* BACK BUTTON - Background removed */
+#goHome {
+    background: transparent; /* Removed background */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#goHome svg {
+    stroke: #ffffff;
+    opacity: 1;
+}
+
+/* FOOTER AREA - Background set to transparent */
+.studio-footer {
+    padding: 0.75rem;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.75rem);
+    background: transparent; /* No background */
+    border-top: none; /* Removed border */
+}
+
+
+        /* CANVAS AREA */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #artFrame {
+            background: white;
+            position: relative;
+            width: min(92vw, 80vh);
+            height: min(92vw, 80vh);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.focus-mode #artFrame {
+            width: 100vw;
+            height: 100dvh;
+            border-radius: 0;
+            z-index: 100;
+        }
+
+        .skin-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--skin-tone);
+            mix-blend-mode: multiply;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s ease-in-out;
+        }
+        #artFrame.preview-active .skin-overlay { opacity: 1; }
+
+        canvas { width: 100%; height: 100%; object-fit: contain; background: white; }
+
+        .compact-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 11px;
+            font-weight: 600;
+            width: 100%;
+            color: white;
+            outline: none;
+            letter-spacing: 0.05em;
+        }
+		.privacy-link {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff; /* Lightened from #444 for better visibility */
+            text-decoration: none !important;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 2px;
+			text-transform: uppercase;
+            opacity: 0.7; /* Increased from 0.5 for better visibility */
+            transition: all 0.3s;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .privacy-link:hover {
+            opacity: 1;
+            color: var(--stencil-blue);
+        }
+        .gen-btn {
+            background: var(--stencil-blue);
+            color: black;
+            padding: 0.85rem;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+	.saturate-btn {
+            background: #f59e0b;
+            color: black;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 0 1.5rem;
+            border-radius: 12px;
+            text-transform: uppercase;
+            display: none !important;
+            transition: all 0.3s;
+			display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+		    .music-pop {
+		    position: absolute;
+		    top: 100%; /* Changed from 110% */
+		    right: 0;
+		    background: #0a0a0a;
+		    border: 1px solid rgba(255,255,255,0.2); /* Slightly brighter border */
+		    width: 160px; /* Widened slightly */
+		    border-radius: 8px;
+		    opacity: 0;
+		    pointer-events: none;
+		    transform: translateY(5px);
+		    transition: 0.2s;
+		    z-index: 2000; /* High z-index to stay above the canvas */
+		    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+		}
+        .music-pop.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+		.track-item { 
+		    padding: 0.8rem 1rem; 
+		    font-size: 10px; 
+		    font-weight: 700; 
+		    text-transform: uppercase; 
+		    color: #ffffff; /* Changed from #475569 for better visibility */
+		    border-bottom: 1px solid rgba(255,255,255,0.05);
+		    cursor: pointer;
+		}
+        .track-item.active { color: var(--stencil-blue); }
+
+        .skin-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .skin-swatch.active { border-color: var(--stencil-blue); scale: 1.1; }
+
+        #loader {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .ring {
+            width: 30px; height: 30px;
+            border: 2px solid rgba(56, 189, 248, 0.1);
+            border-top: 2px solid var(--stencil-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        #exitFocus {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            color: black;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 900;
+            display: none;
+            z-index: 110;
+        }
+        body.focus-mode #exitFocus { display: block; }
+
+        #notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+
+        }
+        #subOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-ad5d5427.js"></script>
+<link rel="manifest" href="/manifest.webmanifest"></head>
+<body>
+
+    <div id="notification"></div>
+
+    <!-- REFILL OVERLAY -->
+    <div id="subOverlay">
+        <h2 class="header-font text-2xl font-black mb-2">OUT OF <span class="text-sky-400">INK</span></h2>
+        <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
+        
+        <div class="w-full max-w-[300px]">
+	<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">    
+	<span>3 Daily Refills (Sub)</span>
+    	<span class="text-sky-400">$4.99/mo</span>
+	</button>
+            <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
+                <span>Fun Plan (50 Tattoos)</span>
+                <span class="text-sky-400">$19.99</span>
+            </button>
+            <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
+                <span>The Artist (100 Tattoos)</span>
+                <span class="text-sky-400">$49.99</span>
+            </button>
+            <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
+                <span>Tattoo Master (200 Tattoos)</span>
+                <span class="text-sky-400">$99.99</span>
+            </button>
+        </div>
+        <button onclick="document.getElementById('subOverlay').style.display='none'" class="mt-8 text-[8px] uppercase tracking-widest opacity-30 font-bold cursor-pointer">Maybe Later</button>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div id="homePage">
+		<!--<button id="helpBtn" style="position: fixed; bottom: 150px; right: 50px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', sans-serif; font-weight: bold; z-index: 1000; backdrop-filter: blur(4px);">?</button>-->
+
+    <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+        <div style="width: 85%; max-width: 400px; padding: 30px; border: 1px solid rgba(56, 189, 248, 0.2); background: #050505; border-radius: 4px; font-family: 'Outfit', sans-serif; color: white; text-align: left;">
+            <h2 style="font-family: 'Orbitron', sans-serif; color: #38bdf8; letter-spacing: 2px; margin-bottom: 20px; font-size: 18px;">OPERATIONS MANUAL</h2>
+            <div style="font-size: 13px; line-height: 2; opacity: 0.7; text-transform: uppercase; tracking: 0.1em;">
+                <p>1. SET BASE CANVAS TONE</p>
+                <p>2. ENTER DESIGN STUDIO</p>
+                <p>3. INPUT CONCEPT PROMPT</p>
+                <p>4. SELECT STYLE ARCHIVE</p>
+                <p>5. ENGAGE ENGINE (GENERATE)</p>
+                <p>6. THEN DOWNLOAD</p>
+				<p>7. PRINT MIRRORED</p>
+				<p>8. TRANSFER TO SKIN</p>
+				<p>9. THEN INK</p>
+				
+            </div>
+            <button id="closeHelp" style="margin-top: 30px; width: 100%; padding: 12px; background: #38bdf8; color: black; border: none; font-family: 'Orbitron', sans-serif; font-weight: 900; cursor: pointer; font-size: 12px;">CLOSE MANUAL</button>
+        </div>
+    </div>
+        <div class="mt-12 mb-8 text-center">
+            <h1 class="header-font text-4xl font-black italic tracking-tighter mb-1">INK-GEN <span class="text-sky-400">PRO</span></h1>
+            <p class="text-[8px] tracking-[0.4em] opacity-100 font-bold uppercase">Tattoo Image Generating Engine</p>
+        </div>
+
+        <div class="home-card shadow-2xl">
+            <h2 class="header-font text-[9px] tracking-[0.2em] opacity-100 uppercase mb-6">Select Base Canvas</h2>
+            <div class="flex justify-between mb-8">
+                <div class="skin-swatch active" style="background: #f3d5b5;" data-color="#f3d5b5"></div>
+                <div class="skin-swatch" style="background: #e5c298;" data-color="#e5c298"></div>
+                <div class="skin-swatch" style="background: #c69061;" data-color="#c69061"></div>
+                <div class="skin-swatch" style="background: #8d5524;" data-color="#8d5524"></div>
+                <div class="skin-swatch" style="background: #3c2005;" data-color="#3c2005"></div>
+            </div>
+            <button id="enterStudio" class="gen-btn">Start Session</button>
+
+
+            <div class="border-t border-white/5 pt-6">
+                <h3 class="header-font text-[8px] tracking-widest opacity-100 uppercase mb-3">Subscription Plans</h3>
+		<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">
+    		    <span>3 Daily Refills (Sub)</span>
+                    <span class="text-sky-400">$4.99/mo</span>
+                </button>
+                <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
+                    <span>Fun Plan (50)</span>
+                    <span class="text-sky-400">$19.99</span>
+                </button>
+                <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
+                    <span>The Artist (100)</span>
+                    <span class="text-sky-400">$49.99</span>
+                </button>
+                <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
+                    <span>Tattoo Master (200)</span>
+                    <span class="text-sky-400">$99.99</span>
+                </button>
+            </div>
+
+        </div>
+        
+        <!-- FOOTER CREDITS & PRIVACY -->
+<div class="mt-12 text-center">
+    <div class="opacity-80 text-[10px] uppercase tracking-widest font-bold mb-4">
+        By MICHAEL TAYLOR & UNIVERSALL BALANCE
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <a href="#" id="manualLink" class="privacy-link">Help Manual</a>
+        <a href="privacy.html" class="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+    </div>
+</div>
+	</div>
+    <!-- STUDIO PAGE -->
+    <div id="studioPage">
+        <button id="exitFocus" class="header-font">EXIT VIEW</button>
+
+		<header class="studio-header !px-6 w-full max-w-[100vw]">
+		<button id="goHome" class="style-btn">
+		    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+		        <path d="m15 18-6-6 6-6"/>
+		    </svg>
+		</button>
+            <div class="flex items-center gap-1 relative">
+                <button id="playBtn" class="style-btn !px-2 !rounded-r-none border-r-0">
+                    <span id="p-ico">▶</span>
+                </button>
+                <button id="musicMenu" class="style-btn !rounded-l-none min-w-[70px] text-left flex justify-between items-center gap-2">
+                    <span id="trackName">Track I</span>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="musicPop" class="music-pop">
+                    <div class="track-item active" data-idx="0">Spiritual I</div>
+                    <div class="track-item" data-idx="1">Spiritual II</div>
+                    <div class="track-item" data-idx="2">Spiritual III</div>
+                </div>
+            </div>
+            <div class="flex gap-1 items-center">
+                <div class="credit-badge">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
+                    <span id="inkVal">3</span>
+                </div>
+            <div class="flex gap-1">
+                <button id="skinTog" class="style-btn">Skin Preview</button>
+		<button id="dlBtn" class="style-btn !mr-2">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+				        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/>
+				        <polyline points="7 10 12 15 17 10"/>
+				        <line x1="12" x2="12" y1="15" y2="3"/>
+				    </svg>
+				</button>
+            
+	<button id="shareBtn" class="style-btn !mr-2">
+    		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        	<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        	<polyline points="16 6 12 2 8 6"/>
+        	<line x1="12" x2="12" y1="2" x2="12" y2="15"/>
+    	</svg>
+	</button>
+	</div>
+        </header>
+
+        <div class="canvas-container">
+            <div id="artFrame">
+                <div class="skin-overlay" id="skinOverlay"></div>
+                <canvas id="tattooCanvas"></canvas>
+                <div id="loader">
+                    <div class="ring"></div>
+                    <div class="mt-3 header-font text-[7px] tracking-widest text-sky-400 animate-pulse">PROCESSING INK</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="studio-footer">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3">
+                <button class="style-btn active" data-style="fineline">Fine Line</button>
+                <button class="style-btn" data-style="singlism">Singlism</button>
+                <button class="style-btn" data-style="blackwork">Blackwork</button>
+                <button class="style-btn" data-style="tribal">Tribal</button>
+                <button class="style-btn" data-style="izumi">Izumi</button>
+                <button class="style-btn" data-style="skulls">Skulls</button>
+                <button class="style-btn" data-style="neo">Neo-Trad</button>
+                <button class="style-btn" data-style="disney">Disney</button>
+                <button class="style-btn" data-style="japanese">Japanese</button>
+                <button class="style-btn" data-style="cyber">Cyber</button>
+                <button class="style-btn" data-style="traditional">Trad</button>
+                <button class="style-btn" data-style="micro">Micro</button>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <input type="text" id="promptInput" placeholder="DESCRIBE THE FUTURE TATTOO" class="compact-input">
+                <div class="flex gap-2">
+                 <!--<button id="saturateBtn" class="saturate-btn">COLOR</button> -->
+                    <button id="generateBtn" class="gen-btn">Generate Ink</button>
+                </div>
+            </div>
+			
+        </footer>
+</div> 
+
+	<audio id="player" loop></audio>
+
+<!-- This is where React will inject your App logic -->
+<div id="root"></div>
+
+<!-- This tells the browser to start the app using your new main.tsx file -->
+
+	<div id="appModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div style="background:#1a1a1a; color:white; padding:30px; border-radius:20px; width:85%; max-width:350px; text-align:center; border:2px solid #00d4ff; box-shadow: 0 0 25px rgba(0,212,255,0.3); font-family: sans-serif;">
+        
+        <div id="modalIcon" style="font-size: 40px; margin-bottom: 15px;">✨</div>
+        <h2 id="modalTitle" style="margin:0 0 10px 0; color:#00d4ff; text-transform: uppercase; letter-spacing: 2px;">SUCCESS</h2>
+        
+        <p id="modalBody" style="font-size:16px; line-height:1.5; margin-bottom: 25px; color: #ccc;"></p>
+        
+        <button onclick="closeModal()" style="background:#00d4ff; color:#000; border:none; padding:12px 0; border-radius:10px; font-weight:bold; font-size:16px; cursor:pointer; width:100%; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            GOT IT
+        </button>
+    </div>
+</div>
+</body>
+</html>
