@@ -506,10 +506,22 @@ async function saturate() {
         };
 
         document.getElementById('dlBtn').onclick = async () => {
+            const fileName = `ink-${Date.now()}.png`;
+            if (IS_WEB) {
+                try {
+                    const link = document.createElement('a');
+                    link.href = (document.getElementById('tattooCanvas') as HTMLCanvasElement).toDataURL('image/png');
+                    link.download = fileName;
+                    link.click();
+                    showAppMsg('SAVED', 'Image downloaded.');
+                } catch (err) {
+                    showAppMsg('ERROR', 'Save failed: ' + String(err), true);
+                }
+                return;
+            }
             try {
                 const base64Data = getCanvasBase64();
                 if (!base64Data) return;
-                const fileName = `ink-${Date.now()}.png`;
                 const file = await Filesystem.writeFile({
                     path: fileName,
                     data: base64Data,
@@ -534,11 +546,32 @@ async function saturate() {
         };
 
 const shareInk = async () => {
+            const fileName = `ink-${Date.now()}.png`;
+            if (IS_WEB) {
+                try {
+                    const canvas = document.getElementById('tattooCanvas') as HTMLCanvasElement;
+                    const blob: Blob = await new Promise((resolve, reject) => {
+                        canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+                    });
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    if ((navigator as any).canShare && (navigator as any).canShare({ files: [file] })) {
+                        await (navigator as any).share({ title: 'INK-GEN PRO Design', files: [file] });
+                    } else {
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = fileName;
+                        link.click();
+                    }
+                } catch (err) {
+                    console.error('Share failed:', err);
+                }
+                return;
+            }
             try {
                 const base64Data = getCanvasBase64();
                 if (!base64Data) return;
                 const file = await Filesystem.writeFile({
-                    path: `ink-${Date.now()}.png`,
+                    path: fileName,
                     data: base64Data,
                     directory: Directory.Cache,
                 });
