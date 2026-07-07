@@ -32,6 +32,7 @@
             color: #f8fafc;
             margin: 0;
             padding: 0;
+            padding-top: env(safe-area-inset-top);
             height: 100dvh;
             width: 100vw;
             display: flex;
@@ -388,12 +389,18 @@
             padding: 2rem;
         }
     </style>
-  <script type="module" crossorigin src="assets/index-ad5d5427.js"></script>
+  <script type="module" src="/main.tsx"></script>
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
 
     <div id="notification"></div>
+
+    <!-- PayPal checkout (web only) -->
+    <div id="paypalOverlay" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.85); padding:24px; align-items:center; justify-content:center; flex-direction:column;">
+        <button onclick="document.getElementById('paypalOverlay').style.display='none'; document.getElementById('paypalButtonContainer').innerHTML='';" class="mb-4 text-[8px] uppercase tracking-widest opacity-60 font-bold cursor-pointer">Cancel</button>
+        <div id="paypalButtonContainer" style="width:100%; max-width:300px;"></div>
+    </div>
 
     <!-- REFILL OVERLAY -->
     <div id="subOverlay">
@@ -401,21 +408,21 @@
         <p class="text-[10px] opacity-40 uppercase tracking-widest mb-8">Refill your creative potential</p>
         
         <div class="w-full max-w-[300px]">
-	<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">    
-	<span>3 Daily Refills (Sub)</span>
-    	<span class="text-sky-400">$4.99/mo</span>
+	<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">
+	<span data-daily-sub-label>3 Daily Refills (Sub)</span>
+    	<span class="text-sky-400" data-price-sku="daily-3-subscription">...</span>
 	</button>
             <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
                 <span>Fun Plan (50 Tattoos)</span>
-                <span class="text-sky-400">$19.99</span>
+                <span class="text-sky-400" data-price-sku="fun_plan">...</span>
             </button>
             <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
                 <span>The Artist (100 Tattoos)</span>
-                <span class="text-sky-400">$49.99</span>
+                <span class="text-sky-400" data-price-sku="the_artist_plan">...</span>
             </button>
             <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
                 <span>Tattoo Master (200 Tattoos)</span>
-                <span class="text-sky-400">$99.99</span>
+                <span class="text-sky-400" data-price-sku="tatoo_master">...</span>
             </button>
         </div>
         <button onclick="document.getElementById('subOverlay').style.display='none'" class="mt-8 text-[8px] uppercase tracking-widest opacity-30 font-bold cursor-pointer">Maybe Later</button>
@@ -463,20 +470,20 @@
             <div class="border-t border-white/5 pt-6">
                 <h3 class="header-font text-[8px] tracking-widest opacity-100 uppercase mb-3">Subscription Plans</h3>
 		<button onclick="purchasePlan(3, 'daily-3-subscription')" class="sub-btn featured">
-    		    <span>3 Daily Refills (Sub)</span>
-                    <span class="text-sky-400">$4.99/mo</span>
+    		    <span data-daily-sub-label>3 Daily Refills (Sub)</span>
+                    <span class="text-sky-400" data-price-sku="daily-3-subscription">...</span>
                 </button>
                 <button onclick="purchasePlan(50, 'fun_plan')" class="sub-btn">
                     <span>Fun Plan (50)</span>
-                    <span class="text-sky-400">$19.99</span>
+                    <span class="text-sky-400" data-price-sku="fun_plan">...</span>
                 </button>
                 <button onclick="purchasePlan(100, 'the_artist_plan')" class="sub-btn featured">
                     <span>The Artist (100)</span>
-                    <span class="text-sky-400">$49.99</span>
+                    <span class="text-sky-400" data-price-sku="the_artist_plan">...</span>
                 </button>
                 <button onclick="purchasePlan(200, 'tatoo_master')" class="sub-btn">
                     <span>Tattoo Master (200)</span>
-                    <span class="text-sky-400">$99.99</span>
+                    <span class="text-sky-400" data-price-sku="tatoo_master">...</span>
                 </button>
             </div>
 
@@ -489,7 +496,7 @@
     </div>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <a href="#" id="manualLink" class="privacy-link">Help Manual</a>
-        <a href="privacy.html" class="privacy-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        <a href="privacy.html" class="privacy-link">Privacy Policy</a>
     </div>
 </div>
 	</div>

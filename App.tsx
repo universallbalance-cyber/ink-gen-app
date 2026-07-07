@@ -1,4 +1,23 @@
 import React, { useEffect } from 'react';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { Media } from '@capacitor-community/media';
+import { BillingPlugin } from 'capacitor-billing';
+import { Capacitor } from '@capacitor/core';
+
+// Web (PayPal) only runs when NOT inside the native Android app — Google Play billing is untouched.
+const IS_WEB = Capacitor.getPlatform() === 'web';
+
+// PayPal sandbox client id ("sb") for testing. Swap in your live PayPal REST app Client ID before going live.
+const PAYPAL_CLIENT_ID = 'BAAJrzGoSNXmpCSqGvwz5HMbWTOIWQAIHbz7ppylcbhAvwAL6DTsttb4ZbgTrP3Wmd35ZRpVx8gyMyBQsY';
+
+// Placeholder USD prices for the web checkout — edit these to whatever you want to charge.
+const PLAN_PRICES: Record<string, string> = {
+    'daily-3-subscription': '4.99',
+    'fun_plan': '19.99',
+    'the_artist_plan': '34.99',
+    'tatoo_master': '64.99',
+};
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -22,7 +41,7 @@ const App: React.FC = () => {
      //   console.log("Daily limit and Pro status reset for a new day.");
 //    }
 //})();
-	const BACKEND_URL = "https://ink-gen-api-365969989524.us-central1.run.app";
+	const BACKEND_URL = "https://ink-gen-api-60118871670.us-central1.run.app";
         const homePage = document.getElementById('homePage');
         const studioPage = document.getElementById('studioPage');
         const canvas = document.getElementById('tattooCanvas');
@@ -48,8 +67,18 @@ let credits;
 // 2. This function decides if the user gets 3 or 0 based on their status
 function handleCreditsOnStartup() {
     const teaserUsed = localStorage.getItem('teaser_used');
-    const hasDailySub = localStorage.getItem('has_daily_3_sub') === 'true';
     const savedInk = localStorage.getItem('user_ink');
+
+    // Web has no backend to verify recurring payment, so the "subscription" is really a
+    // 30-day pass: expire it locally and require a manual repurchase after that.
+    if (IS_WEB) {
+        const expiresAt = parseInt(localStorage.getItem('sub_expires_at')) || 0;
+        if (expiresAt && Date.now() > expiresAt) {
+            localStorage.setItem('has_daily_3_sub', 'false');
+            localStorage.removeItem('sub_expires_at');
+        }
+    }
+    const hasDailySub = localStorage.getItem('has_daily_3_sub') === 'true';
 
     // FIRST TIME EVER: Give them the 3-ink teaser
     if (!teaserUsed) {
@@ -86,6 +115,42 @@ function handleCreditsOnStartup() {
         ];
 
 
+   async function loadLocalizedPrices() {
+        const plans = [
+            { sku: 'daily-3-subscription', playId: 'ink_plans', type: 'SUBS', suffix: '/mo' },
+            { sku: 'fun_plan',             playId: 'fun_plan',  type: 'INAPP', suffix: '' },
+            { sku: 'the_artist_plan',      playId: 'the_artist_plan', type: 'INAPP', suffix: '' },
+            { sku: 'tatoo_master',         playId: 'tatoo_master',    type: 'INAPP', suffix: '' },
+        ];
+
+        if (IS_WEB) {
+            for (const plan of plans) {
+                const suffix = plan.sku === 'daily-3-subscription' ? '/30 days' : plan.suffix;
+                const label = '$' + PLAN_PRICES[plan.sku] + suffix;
+                document.querySelectorAll(`[data-price-sku="${plan.sku}"]`).forEach(el => {
+                    el.textContent = label;
+                });
+            }
+            document.querySelectorAll('[data-daily-sub-label]').forEach(el => {
+                el.textContent = '3 Daily Refills (30-Day Pass)';
+            });
+            return;
+        }
+
+        for (const plan of plans) {
+            try {
+                const details = await BillingPlugin.querySkuDetails({ product: plan.playId, type: plan.type });
+                const label = details.price + plan.suffix;
+                document.querySelectorAll(`[data-price-sku="${plan.sku}"]`).forEach(el => {
+                    el.textContent = label;
+                });
+            } catch (e) {
+                // Leave "..." if billing unavailable (e.g. outside Play Store)
+                console.log(`Price fetch skipped for ${plan.sku}:`, e);
+            }
+        }
+    }
+
    function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
@@ -97,6 +162,7 @@ function handleCreditsOnStartup() {
 
     // --- NEW LOGIC: This triggers the teaser or subscription check ---
     handleCreditsOnStartup();
+    loadLocalizedPrices();
 
     // Audio safe-load (keeps Start Session button working)
     try {
@@ -116,48 +182,92 @@ function handleCreditsOnStartup() {
     		navigator.vibrate(100); // Quick 100ms buzz
   	}
 };
-	window.purchasePlan = async function(amt, sku) {
-    try {
-        // 1. We must use the Product ID 'ink_plans' for Google to find it
-        // But we keep the logic for your specific daily-3-subscription
-        const playStoreID = (sku === 'daily-3-subscription') ? 'ink_plans' : sku;
-        const productType = (sku === 'daily-3-subscription') ? 'subs' : 'inapp';
-
-        const methodData = [{ 
-            supportedMethods: 'https://play.google.com/billing', 
-            data: { 
-                sku: playStoreID, // Send 'ink_plans' to Google
-                type: productType 
-            } 
-        }];
-
-        const request = new PaymentRequest(methodData, { 
-            total: { label: 'Total', amount: { currency: 'USD', value: '0' } } 
-        });
-
-        const response = await request.show();
-        await response.complete('success');
-
-// --- SUCCESS LOGIC ---
-	triggerSuccessHaptic();
+    // Shared "purchase succeeded" logic used by both Google Play billing and web PayPal checkout.
+    function grantPurchase(amt, sku) {
+        triggerSuccessHaptic();
         if (sku === 'daily-3-subscription') {
             localStorage.setItem('has_daily_3_sub', 'true');
             localStorage.setItem('last_sub_refill_date', new Date().toDateString());
-            credits += 3; // Add 3 immediately upon subscribing
-            showAppMsg("Success", "DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
+            credits += 3;
+            if (IS_WEB) {
+                const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+                localStorage.setItem('sub_expires_at', String(Date.now() + THIRTY_DAYS_MS));
+                showAppMsg("Success", "DAILY REFILL ACTIVATED: 3 INKS EVERY DAY FOR 30 DAYS");
+            } else {
+                showAppMsg("Success", "DAILY REFILL ACTIVATED: 3 INKS EVERY DAY");
+            }
         } else {
             credits += amt;
             showAppMsg("Success", "INK RESTOCKED!");
         }
-        // Keep these here once, and remove the copies from inside the if/else above
-        updateInk(); 
+        updateInk();
         document.getElementById('subOverlay').style.display = 'none';
+        document.getElementById('paypalOverlay').style.display = 'none';
+        document.getElementById('paypalButtonContainer').innerHTML = '';
+    }
 
-} catch (e) {
-    console.error("Billing Error:", e);
-    showAppMsg("Billing Error", e.message, true);
-}
-};
+    let paypalSdkPromise = null;
+    function loadPayPalSdk() {
+        if (paypalSdkPromise) return paypalSdkPromise;
+        paypalSdkPromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+            script.onload = () => resolve();
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+        return paypalSdkPromise;
+    }
+
+    async function purchasePlanWeb(amt, sku) {
+        try {
+            await loadPayPalSdk();
+            const container = document.getElementById('paypalButtonContainer');
+            container.innerHTML = '';
+            document.getElementById('paypalOverlay').style.display = 'flex';
+
+            (window as any).paypal.Buttons({
+                createOrder: (_data, actions) => actions.order.create({
+                    purchase_units: [{ amount: { value: PLAN_PRICES[sku] } }],
+                }),
+                onApprove: async (_data, actions) => {
+                    await actions.order.capture();
+                    grantPurchase(amt, sku);
+                },
+                onError: (e) => {
+                    console.error("PayPal Error:", e);
+                    showAppMsg("Payment Error", String(e), true);
+                },
+            }).render('#paypalButtonContainer');
+        } catch (e) {
+            console.error("PayPal Error:", e);
+            showAppMsg("Payment Error", e.message, true);
+        }
+    }
+
+    async function purchasePlanNative(amt, sku) {
+        try {
+            const playStoreID = (sku === 'daily-3-subscription') ? 'ink_plans' : sku;
+            const productType = (sku === 'daily-3-subscription') ? 'SUBS' : 'INAPP';
+
+            const result = await BillingPlugin.launchBillingFlow({
+                product: playStoreID,
+                type: productType
+            });
+
+            // Acknowledge the purchase (required — Google refunds if not acknowledged)
+            if (result.purchaseToken) {
+                await BillingPlugin.sendAck({ purchaseToken: result.purchaseToken });
+            }
+
+            grantPurchase(amt, sku);
+        } catch (e) {
+            console.error("Billing Error:", e);
+            showAppMsg("Billing Error", e.message, true);
+        }
+    }
+
+    window.purchasePlan = IS_WEB ? purchasePlanWeb : purchasePlanNative;
         const showMessage = (text) => {
             notification.textContent = text;
             notification.style.display = 'block';
@@ -289,7 +399,7 @@ async function generate() {
         const fullPrompt = getStylePrompt(selectedStyle) + " " + pVal;
 
         // 4. Send request (Restored 'action' and used standard 'fetch')
-        const response = await fetch('https://ink-gen-api-365969989524.us-central1.run.app', {
+        const response = await fetch('https://ink-gen-api-60118871670.us-central1.run.app', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -389,34 +499,54 @@ async function saturate() {
             document.body.classList.remove('focus-mode'); 
         };
 
-        document.getElementById('dlBtn').onclick = () => {
-            const l = document.createElement('a');
-            l.download = `ink-${Date.now()}.png`; l.href = canvas.toDataURL(); l.click();
+        const getCanvasBase64 = () => {
+            const c = document.getElementById('tattooCanvas') as HTMLCanvasElement;
+            if (!c) return null;
+            return c.toDataURL('image/png').split(',')[1];
         };
-const shareInk = async () => {
-    const canvas = document.getElementById('tattooCanvas') as HTMLCanvasElement;
-    if (!canvas) return;
 
-    canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], 'my-tattoo-design.png', { type: 'image/png' });
-
-        // Check if the device can actually share files
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        document.getElementById('dlBtn').onclick = async () => {
             try {
-                await navigator.share({
-                    files: [file],
-                    title: 'INK-GEN PRO Design',
-                    text: 'Check out this tattoo concept!',
+                const base64Data = getCanvasBase64();
+                if (!base64Data) return;
+                const fileName = `ink-${Date.now()}.png`;
+                const file = await Filesystem.writeFile({
+                    path: fileName,
+                    data: base64Data,
+                    directory: Directory.Cache,
                 });
-            } catch (err) {
-                console.log("User cancelled or share failed", err);
+                let albumId: string | undefined;
+                try {
+                    const albums = await Media.getAlbums();
+                    const existing = albums.albums.find(a => a.name === 'Ink Gen Pro');
+                    if (existing) {
+                        albumId = existing.identifier;
+                    } else {
+                        const created = await Media.createAlbum({ name: 'Ink Gen Pro' });
+                        albumId = created.identifier;
+                    }
+                } catch { /* album lookup failed, try without */ }
+                await Media.savePhoto({ path: file.uri, albumIdentifier: albumId });
+                showAppMsg('SAVED', 'Image saved to your gallery.');
+            } catch(err) {
+                showAppMsg('ERROR', 'Save failed: ' + String(err), true);
             }
-        } else {
-            alert("Sharing is not supported on this browser. Try the Download button!");
-        }
-    }, 'image/png');
-};
+        };
+
+const shareInk = async () => {
+            try {
+                const base64Data = getCanvasBase64();
+                if (!base64Data) return;
+                const file = await Filesystem.writeFile({
+                    path: `ink-${Date.now()}.png`,
+                    data: base64Data,
+                    directory: Directory.Cache,
+                });
+                await Share.share({ title: 'INK-GEN PRO Design', url: file.uri });
+            } catch(err) {
+                console.error('Share failed:', err);
+            }
+        };
 
 // Now hook up the click event (put this with your other button listeners)
 document.getElementById('shareBtn')!.onclick = shareInk;
