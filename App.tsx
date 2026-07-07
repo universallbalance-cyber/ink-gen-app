@@ -151,6 +151,39 @@ function handleCreditsOnStartup() {
         }
     }
 
+    function setupInstallBanner() {
+        if (!IS_WEB) return;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+        if (isStandalone) return;
+        if (localStorage.getItem('install_banner_dismissed') === 'true') return;
+
+        const ua = navigator.userAgent;
+        const isIOS = /iPhone|iPad|iPod/.test(ua);
+        const isAndroid = /Android/.test(ua);
+
+        const banner = document.getElementById('installBanner');
+        const text = document.getElementById('installBannerText');
+        if (!banner || !text) return;
+
+        if (isIOS) {
+            text.textContent = 'Tap the Share icon below, then "Add to Home Screen" for the full app experience.';
+        } else if (isAndroid) {
+            text.textContent = 'Tap the ⋮ menu, then "Add to Home screen" or "Install app".';
+        } else {
+            text.textContent = 'Click the install icon in your browser\'s address bar to add this app to your desktop.';
+        }
+        banner.style.display = 'block';
+
+        const closeBtn = document.getElementById('installBannerClose');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                banner.style.display = 'none';
+                localStorage.setItem('install_banner_dismissed', 'true');
+            };
+        }
+    }
+    setupInstallBanner();
+
    function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
