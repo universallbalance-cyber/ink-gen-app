@@ -184,6 +184,31 @@ function handleCreditsOnStartup() {
     }
     setupInstallBanner();
 
+    function setupTesterUnlock() {
+        const TESTER_EMAILS = ['mpod@sbcglobal.net', 'rich-dog@live.com'];
+        const logo = document.getElementById('logoTapTarget');
+        if (!logo) return;
+        let tapCount = 0;
+        let tapTimer: ReturnType<typeof setTimeout> | null = null;
+        logo.onclick = () => {
+            tapCount += 1;
+            if (tapTimer) clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => { tapCount = 0; }, 3000);
+            if (tapCount >= 5) {
+                tapCount = 0;
+                const email = window.prompt('Tester code:');
+                if (email && TESTER_EMAILS.includes(email.trim().toLowerCase())) {
+                    credits = 100;
+                    updateInk();
+                    showAppMsg('TESTER ACCESS', 'Unlocked 100 inks for this browser.');
+                } else if (email !== null) {
+                    showAppMsg('INVALID', 'That code was not recognized.', true);
+                }
+            }
+        };
+    }
+    setupTesterUnlock();
+
    function init() {
     // Set canvas dimensions
     canvas.width = 1024; 
