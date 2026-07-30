@@ -222,6 +222,12 @@ function handleCreditsOnStartup() {
     handleCreditsOnStartup();
     loadLocalizedPrices();
 
+    // One-time cleanup for ink packs bought before purchases were consumed after buying —
+    // silently frees them up so they can be purchased again. No-op on web.
+    if (!IS_WEB) {
+        BillingPlugin.restorePurchases().catch((e) => console.log('Restore skipped:', e));
+    }
+
     // Audio safe-load (keeps Start Session button working)
     try {
         if (typeof playlist !== 'undefined' && playlist.length > 0) {
@@ -313,14 +319,31 @@ function handleCreditsOnStartup() {
                 type: productType
             });
 
-            // Acknowledge the purchase (required — Google refunds if not acknowledged)
             if (result.purchaseToken) {
-                await BillingPlugin.sendAck({ purchaseToken: result.purchaseToken });
+                if (productType === 'SUBS') {
+                    // Acknowledge the purchase (required — Google refunds if not acknowledged)
+                    await BillingPlugin.sendAck({ purchaseToken: result.purchaseToken });
+                } else {
+                    // Ink packs are consumable — consuming (which also acknowledges) lets the same
+                    // product be bought again next time the user runs out of credits.
+                    await BillingPlugin.consumePurchase({ purchaseToken: result.purchaseToken });
+                }
             }
 
             grantPurchase(amt, sku);
         } catch (e) {
             console.error("Billing Error:", e);
+            // Recover from ink packs bought before consumePurchase() existed: they were
+            // acknowledged but never consumed, so Play now reports them as already owned.
+            if (String(e.message).includes('already owned') || String(e.message).includes('ITEM_ALREADY_OWNED')) {
+                try {
+                    await BillingPlugin.restorePurchases();
+                    showAppMsg("One Sec", "Refreshed your purchase history — please tap the button again.");
+                    return;
+                } catch (e2) {
+                    console.error("Restore Error:", e2);
+                }
+            }
             showAppMsg("Billing Error", e.message, true);
         }
     }
